@@ -1103,11 +1103,13 @@ async function initiateDodoPayment(planType) {
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1";
 
-    const returnUrl = isLocalhost
-      ? "http://localhost:5500"
-      : "https://redditfix.vercel.app";
+ // ✅ BEST APPROACH - Automatically uses current domain:
+const returnUrl = window.location.hostname.includes('localhost')
+  ? "http://localhost:5500"
+  : window.location.origin;  // This automatically gets the current domain!
 
-    localStorage.setItem("payment_return_url", returnUrl);
+localStorage.setItem("payment_return_url", returnUrl);
+
 
     // Show important redirect info
     showToast("Redirecting to payment...", "info");
