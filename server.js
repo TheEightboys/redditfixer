@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const axios = require("axios");
+const webhookHandler = require('./api/dodo/webhook');
 require("dotenv").config();
 
 const app = express();
@@ -53,6 +54,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.post('/api/dodo/webhook', express.json(), webhookHandler);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));

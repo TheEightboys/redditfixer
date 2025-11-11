@@ -13,7 +13,7 @@ console.log('🔌 API URL:', API_URL);  // Production backend on Render
 let supabaseClient = null;
 let currentUser = null;
 let userProfile = null;
-let userPlan = null;
+let userPlan = null;  
 let userHistory = [];
 let bootstrapModals = {};
 let bootstrapToast = null;
@@ -75,7 +75,7 @@ const PRICING_DATA = {
       posts: 150,
       productId: "pdt_LBHf0mWr6mV54umDhx9cn",
       checkoutUrl:
-        "https://checkout.dodopayments.com/buy/pdt_LBHf0mWr6mV54umDhx9cn?quantity=1",
+        "https://test.checkout.dodopayments.com/buy/pdt_XocDrGw3HxTb0nD7nyYyl?quantity=1",
     },
     yearly: {
       price: 11.11,
@@ -1123,125 +1123,55 @@ async function handleOptimize(isRegen = false) {
 // PAYMENT FUNCTIONS (USES SECURE BACKEND)
 // ============================================
 
+// =====================================================
+// FIXED: initiateDodoPayment function
+// =====================================================
 async function initiateDodoPayment(planType) {
   if (!currentUser) {
     showToast("Please sign in to upgrade", "warning");
     return showAuthModal();
   }
 
-  const billingCycle = document.querySelector(
-    'input[name="billingCycle"]:checked'
-  ).value;
+  const billingCycleInput = document.querySelector('input[name="billingCycle"]:checked');
+  const billingCycle = billingCycleInput ? billingCycleInput.value : 'monthly';
   const planData = PRICING_DATA[planType][billingCycle];
 
+  if (!planData) {
+    showToast("Invalid plan selected", "error");
+    return;
+  }
+
   try {
-    const pendingPayment = {
-      userId: currentUser.id,
-      email: currentUser.email,
-      plan: planType,
-      billingCycle: billingCycle,
-      postsPerMonth: planData.posts,
-      amount: planData.price,
-      timestamp: Date.now(),
-    };
-
-    // Save to localStorage
-    try {
-      localStorage.setItem("pending_payment", JSON.stringify(pendingPayment));
-      console.log("💾 Payment data saved to localStorage:", pendingPayment);
-
-      // Verify it was saved
-      const saved = localStorage.getItem("pending_payment");
-      if (!saved) {
-        throw new Error("localStorage.setItem failed - data not saved!");
-      }
-      console.log("✅ Verified: Payment data stored successfully");
-    } catch (storageError) {
-      console.error("❌ localStorage error:", storageError);
-      alert(
-        "⚠️ Unable to save payment data.\n\n" +
-          "This might be because:\n" +
-          "• Private/Incognito mode is blocking storage\n" +
-          "• Browser storage is full\n" +
-          "• Browser settings block localStorage\n\n" +
-          "Please use normal browsing mode and try again."
-      );
-      return;
-    }
-
-    // Detect environment and set return URL
-    const isLocalhost =
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1";
-
-    // ✅ BEST APPROACH - Automatically uses current domain:
     const returnUrl = window.location.hostname.includes("localhost")
       ? "http://localhost:5500"
-      : window.location.origin; // This automatically gets the current domain!
+      : "https://redrule.site";
 
-    localStorage.setItem("payment_return_url", returnUrl);
-
-    // Show important redirect info
-    showToast("Redirecting to payment...", "info");
-
-    // Build success and cancel URLs
-    const successRedirect = `${returnUrl}/dashboard.html?payment=success&plan=${planType}&cycle=${billingCycle}`;
-    const cancelRedirect = `${returnUrl}/dashboard.html?payment=cancelled`;
-
-    // For Dodo Payments: use 'redirect_url' parameter
+    const successRedirect = `${returnUrl}/dashboard.html?payment=success&session_id={CHECKOUT_SESSION_ID}`;
+    
     const checkoutUrl = new URL(planData.checkoutUrl);
     checkoutUrl.searchParams.set("redirect_url", successRedirect);
+    checkoutUrl.searchParams.set("customer_email", currentUser.email);
+    
+    // ✅ CORRECT WAY - Individual parameters
+    checkoutUrl.searchParams.set("metadata[userId]", currentUser.id);
+    checkoutUrl.searchParams.set("metadata[email]", currentUser.email);
+    checkoutUrl.searchParams.set("metadata[planType]", planType);
+    checkoutUrl.searchParams.set("metadata[billingCycle]", billingCycle);
+    checkoutUrl.searchParams.set("metadata[postsPerMonth]", planData.posts.toString());
+    checkoutUrl.searchParams.set("metadata[amount]", planData.price.toString());
 
-    console.log("🔗 Redirecting to Dodo checkout:", checkoutUrl.toString());
-    console.log("✅ Success redirect URL:", successRedirect);
-    console.log("❌ Cancel redirect URL:", cancelRedirect);
-    // When creating Dodo checkout, add this metadata:
-    // When creating Dodo checkout, add this metadata:
-
-    // Show payment instructions to user
-    const userConfirmed = confirm(
-      "🎉 Ready to upgrade!\n\n" +
-        "IMPORTANT: After completing payment on Dodo's page:\n\n" +
-        "✅ Look for a 'Return to Merchant' button\n" +
-        "✅ Click it to return to your dashboard\n\n" +
-        "If you don't see the button:\n" +
-        "1. Simply close the payment tab\n" +
-        "2. Return to this dashboard tab\n" +
-        "3. Refresh the page to see your new credits\n\n" +
-        "Click OK to proceed to payment →"
-    );
-
-    if (!userConfirmed) {
-      showToast("Payment cancelled", "info");
-      return;
-    }
-
-    // Open payment in new tab so user can easily return
-    const paymentWindow = window.open(checkoutUrl.toString(), "_blank");
-
-    if (!paymentWindow) {
-      alert(
-        "⚠️ Pop-up blocked!\n\n" +
-          "Please allow pop-ups for this site, then try again.\n\n" +
-          "OR: We'll redirect you now (same tab)"
-      );
-      window.location.href = checkoutUrl.toString();
-    } else {
-      showToast("Payment opened in new tab. Complete payment there!", "info");
-
-      // Show reminder after 3 seconds
-      setTimeout(() => {
-        showToast(
-          "After payment, close that tab and refresh this page!",
-          "info"
-        );
-      }, 3000);
-    }
+    console.log("🔗 Checkout URL:", checkoutUrl.toString());
+    
+    // Redirect to Dodo
+    window.location.href = checkoutUrl.toString();
+    
   } catch (error) {
-    console.error("❌ Payment init error:", error);
+    console.error("❌ Payment error:", error);
     showToast(error.message || "Failed to initiate payment", "error");
   }
 }
+
+
 // ==========================================
 // PAYMENT SUCCESS HANDLER - COMPLETE FIX
 // ==========================================
@@ -1545,204 +1475,99 @@ function updateCurrentPlanDisplay() {
 }
 
 async function handlePaymentCallback(authSession = null) {
-  // Support multiple payment callback formats:
-  // 1) Query params: ?payment=success&session_id=XYZ
-  // 2) Path-based Dodo status: /status/:id/succeeded or /status/:id/failed
   const urlParams = new URLSearchParams(window.location.search);
   let paymentStatus = urlParams.get("payment");
   let sessionId = urlParams.get("session_id");
 
-  // If no payment status detected, exit early
   if (!paymentStatus) {
-    return false; // Return false = no payment callback
-  }
-  if (!paymentStatus) {
-    return false; // Return false = no payment callback
-  }
-
-  // Detect path-based status (e.g. /status/9suUYAP1/succeeded)
-  try {
-    const pathParts = window.location.pathname.split("/").filter(Boolean);
-    const statusIndex = pathParts.indexOf("status");
-    if (statusIndex !== -1 && pathParts.length >= statusIndex + 3) {
-      const possibleId = pathParts[statusIndex + 1];
-      const possibleStatus = pathParts[statusIndex + 2];
-      // Normalize Dodo statuses to our paymentStatus values
-      if (possibleStatus === "succeeded" || possibleStatus === "success") {
-        paymentStatus = paymentStatus || "success";
-        sessionId = sessionId || possibleId;
-      } else if (
-        possibleStatus === "failed" ||
-        possibleStatus === "cancelled"
-      ) {
-        paymentStatus = paymentStatus || "cancelled";
-        sessionId = sessionId || possibleId;
-      }
-    }
-  } catch (e) {
-    // non-fatal
+    return false;
   }
 
   if (paymentStatus === "success") {
     console.log("💳 Payment success detected!");
-    showToast("Payment successful! 🎉 Activating your plan...", "success");
+    showToast("Verifying your payment with Dodo... ⏳", "info");
 
-    const pendingPayment = localStorage.getItem("pending_payment");
-    console.log(
-      "🔍 Checking localStorage for pending_payment:",
-      pendingPayment ? "FOUND" : "NOT FOUND"
-    );
-
-    if (!pendingPayment) {
-      console.warn("⚠️ No pending payment data found in localStorage!");
-      console.log("📋 All localStorage keys:", Object.keys(localStorage));
-      showToast(
-        "Payment completed but session data was lost. Please contact support with your payment ID.",
-        "warning"
-      );
+    if (!sessionId) {
+      console.error("❌ No session ID in URL!");
+      showToast("Payment completed but verification failed. Contact support.", "error");
       return false;
     }
 
-    if (pendingPayment) {
-      try {
-        const paymentData = JSON.parse(pendingPayment);
-        console.log("📦 Payment data retrieved:", paymentData);
-
-        // Check if we already have currentUser (we're in auth callback)
-        if (!currentUser) {
-          console.error("❌ No currentUser available!");
-          showToast("Please wait for authentication to complete", "warning");
-          return false;
-        }
-
-        console.log("✅ Using currentUser:", currentUser.id);
-
-        console.log("🔑 Getting auth session token...");
-
-        let session = authSession; // Use session passed from auth callback
-
-        // If no session was passed, try to get it
-        if (!session) {
-          console.log("⚠️ No session passed, attempting to retrieve...");
-          try {
-            const sessionData = await supabaseClient.auth.getSession();
-            session = sessionData?.data?.session;
-            console.log(
-              "🔐 Session retrieved:",
-              session ? "✅ HAS TOKEN" : "❌ NO TOKEN"
-            );
-          } catch (sessionError) {
-            console.error("❌ Error getting session:", sessionError);
-            showToast("Authentication error. Please try again.", "error");
-            return false;
-          }
-        } else {
-          console.log("✅ Using passed session from auth callback");
-        }
-
-        if (!session) {
-          console.error("❌ No active session token!");
-          showToast("Please sign in again to activate your plan", "warning");
-          return false;
-        }
-
-        console.log("🌐 Waking up server...");
-        await wakeUpServer();
-
-        console.log("📡 Sending verification request to backend...");
-        const verifyResponse = await fetch(`${API_URL}/api/payment/verify`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ ...paymentData, sessionId: sessionId }),
-        });
-
-        console.log(
-          "📥 Response status:",
-          verifyResponse.status,
-          verifyResponse.statusText
-        );
-
-        const verifyData = await verifyResponse.json();
-        console.log("Payment verification response:", verifyData);
-
-        if (verifyResponse.ok) {
-          console.log("✅ Payment verified successfully!");
-
-          // Wait a bit for database to update
-          console.log("⏳ Waiting 1 second for database sync...");
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-
-          // Reload user data to get updated credits immediately
-          console.log("🔄 Loading updated user data...");
-          await loadUserData();
-          console.log(
-            "✅ User data reloaded. Credits:",
-            userPlan?.credits_remaining
-          );
-
-          // Remove pending payment
-          localStorage.removeItem("pending_payment");
-          console.log("🗑️ Cleared pending_payment from localStorage");
-
-          // Hide the manual verify button
-          const manualBtn = document.getElementById("manualVerifyBtn");
-          if (manualBtn) {
-            manualBtn.style.display = "none";
-            console.log("✅ Hidden manual verify button");
-          }
-
-          showToast("Plan activated! Credits unlocked! 🎉", "success");
-
-          // Force UI update
-          console.log("🔄 Forcing UI update...");
-          updateUI();
-
-          // Clean URL without reloading page
-          const cleanUrl = window.location.origin + window.location.pathname;
-          window.history.replaceState({}, document.title, cleanUrl);
-
-          return true; // Payment processed successfully
-        } else {
-          console.error("Payment verification failed:", verifyData);
-          showToast(
-            "Payment verified but plan activation may have failed.",
-            "warning"
-          );
-          localStorage.removeItem("pending_payment");
-          return false; // Payment failed
-        }
-      } catch (error) {
-        console.error("Error processing payment callback:", error);
-        showToast(
-          "Payment processed but couldn't update immediately.",
-          "warning"
-        );
-        localStorage.removeItem("pending_payment");
-        return false; // Error occurred
+    try {
+      if (!currentUser) {
+        console.error("❌ No currentUser available!");
+        showToast("Please sign in to activate your plan", "warning");
+        return false;
       }
+
+      let session = authSession;
+      if (!session) {
+        const sessionData = await supabaseClient.auth.getSession();
+        session = sessionData?.data?.session;
+      }
+
+      if (!session) {
+        showToast("Authentication required. Please sign in.", "error");
+        return false;
+      }
+
+      console.log("📡 Verifying payment with backend...");
+      
+      // Backend will verify with Dodo API
+      const verifyResponse = await fetch(`${API_URL}/api/payment/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ 
+          sessionId: sessionId,
+          userId: currentUser.id
+        }),
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (verifyResponse.ok && verifyData.success) {
+        console.log("✅ Payment verified by Dodo!");
+        
+        // Clear pending payment
+        localStorage.removeItem("pending_payment");
+        
+        // Reload user data
+        await loadUserData();
+        
+        showToast("✅ Payment verified! Your plan is now active! 🎉", "success");
+        
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        return true;
+      } else {
+        throw new Error(verifyData.error || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("❌ Payment verification error:", error);
+      showToast(
+        "Could not verify payment. If you paid, contact support with your payment ID: " + sessionId,
+        "error"
+      );
+      return false;
     }
-    return false; // No pending payment
   } else if (paymentStatus === "cancelled") {
     showToast("Payment was cancelled.", "warning");
     localStorage.removeItem("pending_payment");
-
-    // Navigate to pricing page without full reload
+    
     setTimeout(() => {
       navigateToPage("pricing");
-      // Clean URL
-      const cleanUrl = window.location.origin + window.location.pathname;
-      window.history.replaceState({}, document.title, cleanUrl);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }, 1500);
-
-    return false; // Payment cancelled
+    
+    return false;
   }
 
-  return false; // No payment status
+  return false;
 }
-
 // ============================================
 // MANUAL PAYMENT VERIFICATION
 // ============================================

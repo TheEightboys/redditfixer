@@ -14,7 +14,24 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+-- Create payment records table
+CREATE TABLE payment_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  payment_id TEXT UNIQUE NOT NULL,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  plan_type TEXT NOT NULL,
+  amount DECIMAL(10,2) NOT NULL,
+  billing_cycle TEXT NOT NULL,
+  status TEXT NOT NULL,
+  verified_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+-- Add RLS policies
+ALTER TABLE payment_records ENABLE ROW LEVEL SECURITY;
 
+CREATE POLICY "Users can view own payments"
+  ON payment_records FOR SELECT
+  USING (auth.uid() = user_id);
 ---- Add these fields if they don't exist (safe to run multiple times)
 ALTER TABLE payments 
 ADD COLUMN IF NOT EXISTS dodo_session_id TEXT,
