@@ -4,6 +4,8 @@ const SUPABASE_ANON_KEY =
 const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:3000"
+    : window.location.hostname === "www.redrule.site"
+    ? "https://redrule.site"
     : "https://redrule.site";
 
 // --- GLOBAL STATE ---
@@ -2158,7 +2160,7 @@ function hideAuthModal() {
 }
 
 function showLoadingScreen() {
-  const el = document.getElementById("loadingScreen");
+  const el = document.getElement("loadingScreen");
   if (el) el.style.display = "flex";
 }
 
