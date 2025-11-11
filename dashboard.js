@@ -1,12 +1,13 @@
 const SUPABASE_URL = "https://duzaoqvdukdnbjzccwbp.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1emFvcXZkdWtkbmJqemNjd2JwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4OTE2MTIsImV4cCI6MjA3NzQ2NzYxMn0.eMvGGHRuqzeGjVMjfLViaJnMvaKryGCPWWaDyFK6UP8";
-const API_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:3000"
-    : window.location.hostname === "www.redrule.site"
-    ? "https://redrule.site"
-    : "https://redrule.site";
+// ✅ CORRECT - This works for both localhost AND production
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? "http://localhost:3000"  // Local development
+  : "https://reddit-posts-content-giver.onrender.com";  // Production on Render
+
+console.log('🌍 Current domain:', window.location.hostname);
+console.log('🔌 API URL:', API_URL);  // Production backend on Render
 
 // --- GLOBAL STATE ---
 let supabaseClient = null;
