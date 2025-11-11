@@ -20,6 +20,8 @@ const allowedOrigins = [
   "http://127.0.0.1:5500",
   "http://localhost:5500",
   "http://localhost:3000",
+   "https://www.redrule.site",           // ✅ ADD THIS - Your new domain with www
+  "https://redrule.site", 
   "https://reddit-posts-content-giver.vercel.app",
   "https://reddit-posts-content-giver-git-main-theboys-projects-3cf681c8.vercel.app",
   "https://reddit-posts-content-giver-8wf66t2sf-theboys-projects-3cf681c8.vercel.app",
