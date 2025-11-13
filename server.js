@@ -43,6 +43,12 @@ const corsOptions = {
   credentials: true,
 };
 
+// Be explicit about allowed methods/headers so preflight responses include them
+// (helps when requests include Authorization or Content-Type headers)
+corsOptions.methods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
+corsOptions.allowedHeaders = ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'];
+corsOptions.optionsSuccessStatus = 200;
+
 // Use the official `cors` middleware so it handles preflight (OPTIONS) properly
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
