@@ -1238,8 +1238,7 @@ async function handlePaymentReturn() {
     // Try the new /api/payment/success endpoint first (fallback if webhook failed)
     let result;
     
-    // Get plan details from localStorage or defaults
-    const paymentData = pendingPayment ? JSON.parse(pendingPayment) : {};
+    // Extract plan details from localStorage or use defaults
     const planType = paymentData?.planType || "professional";
     const billingCycle = paymentData?.billingCycle || "monthly";
     
