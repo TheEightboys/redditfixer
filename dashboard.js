@@ -757,6 +757,7 @@ function displayHistory() {
   }
 
   tableBody.innerHTML = userHistory
+    .filter(post => post && post.created_at) // Filter out null/undefined items or missing created_at
     .map((post) => {
       const date = new Date(post.created_at).toLocaleDateString();
       const type =
