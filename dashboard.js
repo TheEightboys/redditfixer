@@ -1578,40 +1578,99 @@ async function handlePaymentCallback(authSession = null) {
         return false;
       }
 
-      console.log("📡 Verifying payment with backend...");
+      // Get payment data from localStorage
+      const pendingPayment = localStorage.getItem("pending_payment");
+      const paymentData = pendingPayment ? JSON.parse(pendingPayment) : null;
       
-      // Backend will verify with Dodo API
-      const verifyResponse = await fetch(`${API_URL}/api/payment/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ 
-          sessionId: sessionId,
-          userId: currentUser.id
-        }),
-      });
+      console.log("� Payment data from localStorage:", paymentData);
+      console.log("�📡 Calling /api/payment/success with plan data...");
+      
+      // Extract plan details
+      const planType = paymentData?.planType || "professional";
+      const billingCycle = paymentData?.billingCycle || "monthly";
+      
+      try {
+        // Try the new /api/payment/success endpoint first
+        const successResponse = await fetch(`${API_URL}/api/payment/success`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            userId: session.user?.id,
+            sessionId: sessionId,
+            planType: planType,
+            billingCycle: billingCycle,
+            amount: paymentData?.amount || 0,
+            email: session.user?.email || paymentData?.email,
+          }),
+        });
 
-      const verifyData = await verifyResponse.json();
+        if (!successResponse.ok) {
+          throw new Error(`Payment success endpoint returned ${successResponse.status}`);
+        }
 
-      if (verifyResponse.ok && verifyData.success) {
-        console.log("✅ Payment verified by Dodo!");
+        const verifyData = await successResponse.json();
         
-        // Clear pending payment
-        localStorage.removeItem("pending_payment");
+        if (verifyData.success) {
+          console.log("✅ Plan activated successfully!", verifyData);
+          
+          // Clear pending payment
+          localStorage.removeItem("pending_payment");
+          
+          // Reload user data to get updated plan
+          await loadUserData();
+          
+          showToast("✅ Payment verified! Your plan is now active! 🎉", "success");
+          
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          return true;
+        } else {
+          throw new Error(verifyData.error || "Plan activation failed");
+        }
+      } catch (fallbackError) {
+        console.warn("⚠️ Payment success endpoint failed, trying old verify endpoint...", fallbackError);
         
-        // Reload user data
-        await loadUserData();
-        
-        showToast("✅ Payment verified! Your plan is now active! 🎉", "success");
-        
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-        
-        return true;
-      } else {
-        throw new Error(verifyData.error || "Payment verification failed");
+        // Fallback to old verify endpoint as last resort
+        const verifyResponse = await fetch(`${API_URL}/api/payment/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ 
+            sessionId: sessionId,
+            userId: session.user?.id,
+            plan: planType,
+            billingCycle: billingCycle,
+            postsPerMonth: paymentData?.postsPerMonth || 250,
+            amount: paymentData?.amount || 0,
+          }),
+        });
+
+        const verifyData = await verifyResponse.json();
+
+        if (verifyResponse.ok && verifyData.success) {
+          console.log("✅ Payment verified by fallback endpoint!");
+          
+          // Clear pending payment
+          localStorage.removeItem("pending_payment");
+          
+          // Reload user data
+          await loadUserData();
+          
+          showToast("✅ Payment verified! Your plan is now active! 🎉", "success");
+          
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+          
+          return true;
+        } else {
+          throw new Error(verifyData.error || "Payment verification failed");
+        }
       }
     } catch (error) {
       console.error("❌ Payment verification error:", error);
