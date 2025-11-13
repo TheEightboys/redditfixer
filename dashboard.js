@@ -645,6 +645,8 @@ function checkAndShowCurrentPlan() {
 
   const pricingSection = document.getElementById("pricingPlansSection");
   const currentPlanSection = document.getElementById("currentPlanSection");
+  const optimizerPaywall = document.getElementById("optimizerPaywall");
+  const optimizerContent = document.getElementById("optimizerContent");
 
   if (userPlan.plan_type !== "free") {
     console.log("✅ User has paid plan - showing current plan card");
@@ -656,13 +658,21 @@ function checkAndShowCurrentPlan() {
     // Show Content Optimizer for paid users
     const optimizerLink = document.querySelector('[data-page="contentOptimizer"]');
     if (optimizerLink) optimizerLink.style.display = "block";
+    
+    // Show optimizer content, hide paywall
+    if (optimizerPaywall) optimizerPaywall.style.display = "none";
+    if (optimizerContent) optimizerContent.style.display = "block";
   } else {
     console.log("ℹ️ User has free plan - showing pricing");
     if (pricingSection) pricingSection.style.display = "block";
     if (currentPlanSection) currentPlanSection.style.display = "none";
-    // Hide Content Optimizer for free users
+    // Show Content Optimizer link for free users (but disabled)
     const optimizerLink = document.querySelector('[data-page="contentOptimizer"]');
-    if (optimizerLink) optimizerLink.style.display = "none";
+    if (optimizerLink) optimizerLink.style.display = "block";
+    
+    // Show paywall, hide optimizer content
+    if (optimizerPaywall) optimizerPaywall.style.display = "block";
+    if (optimizerContent) optimizerContent.style.display = "none";
   }
 }
 
