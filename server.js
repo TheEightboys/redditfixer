@@ -426,19 +426,22 @@ app.post("/api/payment/success", async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing userId" });
     }
 
-    console.log(`\n✅ Payment success endpoint called for user ${userId}`);
+    console.log(`\n✅ PAYMENT SUCCESS ENDPOINT called`);
+    console.log(`   User ID: ${userId}`);
     console.log(`   Session ID: ${sessionId}`);
-    console.log(`   Plan: ${planType}, Billing: ${billingCycle}`);
+    console.log(`   Request body:`, JSON.stringify(req.body, null, 2));
 
-    // Set default values if missing
-    const plan = planType || "starter";
+    // Set default values if missing - use "professional" as default paid plan
+    const plan = planType || "professional";
     const cycle = billingCycle || "monthly";
     const planLimits = {
       starter: 150,
       professional: 250,
       enterprise: 300,
     };
-    const credits = planLimits[plan] || 150;
+    const credits = planLimits[plan] || 250; // Default to professional (250 credits)
+
+    console.log(`   Plan type: ${plan}, Billing cycle: ${cycle}, Credits: ${credits}`);
 
     const expiryDate = new Date();
     if (cycle === "yearly") {
@@ -447,11 +450,21 @@ app.post("/api/payment/success", async (req, res) => {
       expiryDate.setMonth(expiryDate.getMonth() + 1);
     }
 
-    // Activate/update the plan
+    console.log(`   Expiry date: ${expiryDate.toISOString()}`);
+
+    // First, get existing plan to see current state
+    const { data: existingPlan } = await supabase
+      .from("user_plans")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    console.log(`   Existing plan:`, existingPlan);
+
+    // Activate/update the plan using UPDATE instead of UPSERT for reliability
     const { data: planData, error: planError } = await supabase
       .from("user_plans")
-      .upsert({
-        user_id: userId,
+      .update({
         plan_type: plan,
         posts_per_month: credits,
         credits_remaining: credits,
@@ -461,17 +474,50 @@ app.post("/api/payment/success", async (req, res) => {
         activated_at: new Date().toISOString(),
         expires_at: expiryDate.toISOString(),
         updated_at: new Date().toISOString(),
-      }, { onConflict: "user_id" })
+      })
+      .eq("user_id", userId)
       .select()
       .single();
 
     if (planError) {
-      console.error("❌ Plan activation error:", planError);
+      console.error("❌ Plan update error:", planError);
+      // Try INSERT if UPDATE didn't find the record
+      if (planError.code === "PGRST116") {
+        console.log(`   Record not found, creating new plan...`);
+        const { data: insertData, error: insertError } = await supabase
+          .from("user_plans")
+          .insert({
+            user_id: userId,
+            plan_type: plan,
+            posts_per_month: credits,
+            credits_remaining: credits,
+            billing_cycle: cycle,
+            status: "active",
+            amount: amount || 0,
+            activated_at: new Date().toISOString(),
+            expires_at: expiryDate.toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+        
+        if (insertError) {
+          console.error("❌ Plan insert error:", insertError);
+          return res.status(500).json({ success: false, error: insertError.message });
+        }
+        
+        console.log(`✅ Plan created successfully for user ${userId}:`, insertData);
+        return res.json({
+          success: true,
+          message: "Plan created and activated successfully",
+          plan: insertData,
+        });
+      }
       return res.status(500).json({ success: false, error: planError.message });
     }
 
-    console.log(`✅ Plan activated successfully for user ${userId}`);
-    console.log(`   Credits: ${credits}, Expires: ${expiryDate.toISOString()}`);
+    console.log(`✅ Plan updated successfully for user ${userId}`);
+    console.log(`   Updated plan:`, planData);
 
     res.json({
       success: true,

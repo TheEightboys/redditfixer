@@ -1161,6 +1161,18 @@ async function initiateDodoPayment(planType) {
     checkoutUrl.searchParams.set("metadata[postsPerMonth]", planData.posts.toString());
     checkoutUrl.searchParams.set("metadata[amount]", planData.price.toString());
 
+    // ✅ ALSO SAVE TO LOCALSTORAGE - fallback in case metadata doesn't come back
+    const paymentData = {
+      planType: planType,
+      billingCycle: billingCycle,
+      postsPerMonth: planData.posts,
+      amount: planData.price,
+      email: currentUser.email,
+      timestamp: new Date().toISOString(),
+    };
+    localStorage.setItem("pending_payment", JSON.stringify(paymentData));
+
+    console.log("💾 Saved pending payment to localStorage:", paymentData);
     console.log("🔗 Checkout URL:", checkoutUrl.toString());
     
     // Redirect to Dodo
@@ -1225,8 +1237,16 @@ async function handlePaymentReturn() {
 
     // Try the new /api/payment/success endpoint first (fallback if webhook failed)
     let result;
+    
+    // Get plan details from localStorage or defaults
+    const paymentData = pendingPayment ? JSON.parse(pendingPayment) : {};
+    const planType = paymentData?.planType || "professional";
+    const billingCycle = paymentData?.billingCycle || "monthly";
+    
+    console.log("� Payment data from localStorage:", paymentData);
+    console.log(`�📡 Calling /api/payment/success with planType: ${planType}, billingCycle: ${billingCycle}`);
+    
     try {
-      console.log("📡 Calling /api/payment/success endpoint...");
       const successResponse = await fetch(`${API_URL}/api/payment/success`, {
         method: "POST",
         headers: {
@@ -1236,10 +1256,10 @@ async function handlePaymentReturn() {
         body: JSON.stringify({
           userId: session.user?.id,
           sessionId: finalSessionId,
-          planType: verifyPayload.plan,
-          billingCycle: verifyPayload.billingCycle,
-          amount: verifyPayload.amount,
-          email: verifyPayload.email,
+          planType: planType,
+          billingCycle: billingCycle,
+          amount: paymentData?.amount || 0,
+          email: session.user?.email || paymentData?.email,
         }),
       });
       
