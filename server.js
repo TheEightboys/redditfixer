@@ -187,8 +187,8 @@ app.get("/api/user/data", async (req, res) => {
       const { data: newPlan } = await supabase.from("user_plans").insert({
         user_id: user.id,
         plan_type: "free",
-        posts_per_month: 10,
-        credits_remaining: 10,
+        posts_per_month: 5,
+        credits_remaining: 5,
         status: "active"
       }).select().single();
       plan = newPlan;

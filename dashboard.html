@@ -897,29 +897,23 @@
               <div class="col-lg-4">
                 <div class="card h-100 shadow-sm border-0">
                   <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="card-title fw-bold mb-2">Starter</h5>
+                    <h5 class="card-title fw-bold mb-2">Free</h5>
                     <div class="mb-4">
-                      <span
-                        class="display-5 fw-bold text-info"
-                        id="starterPrice"
-                        >$1.29</span
-                      >
-                      <small class="text-muted">
-                        <span id="starterBilling">/month</span>
-                      </small>
+                      <span class="display-5 fw-bold text-secondary">$0</span>
+                      <small class="text-muted">forever</small>
                     </div>
 
                     <ul class="list-unstyled mb-4">
                       <li class="mb-2">
                         <i class="fas fa-check text-success me-2"></i>
-                        <strong id="starterPosts">150 Posts Per Month</strong>
+                        <strong>5 Posts Per Month</strong>
                       </li>
                       <li class="mb-2">
                         <i class="fas fa-check text-success me-2"></i> AI Post
                         Generation
                       </li>
                       <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Content
+                        <i class="fas fa-times text-danger me-2"></i> Content
                         Optimization
                       </li>
                       <li class="mb-2">
@@ -936,11 +930,8 @@
                       </li>
                     </ul>
 
-                    <button
-                      class="btn btn-info w-100 fw-bold mt-auto"
-                      onclick="initiateDodoPayment('starter')"
-                    >
-                      <i class="fas fa-arrow-up me-2"></i>Get Started
+                    <button class="btn btn-secondary w-100 fw-bold mt-auto" disabled>
+                      <i class="fas fa-check me-2"></i>Your Current Plan
                     </button>
                   </div>
                 </div>
@@ -994,9 +985,9 @@
                         <i class="fas fa-check text-success me-2"></i> Priority
                         Support
                       </li>
-                      <li class="mb-2 text-muted">
-                        <i class="fas fa-times text-danger me-2"></i> Basic
-                        Analytics
+                      <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i> Analytics
+                        Dashboard
                       </li>
                     </ul>
 
@@ -1013,7 +1004,7 @@
               <div class="col-lg-4">
                 <div class="card h-100 shadow-sm border-0">
                   <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="card-title fw-bold mb-2">Lifetime</h5>
+                    <h5 class="card-title fw-bold mb-2">Lifetime Access</h5>
                     <div class="mb-4">
                       <span
                         class="display-5 fw-bold text-danger"
@@ -1021,7 +1012,7 @@
                         >$29.00</span
                       >
                       <small class="text-muted">
-                        <span id="enterpriseBilling">/month</span>
+                        <span id="enterpriseBilling">one-time payment</span>
                       </small>
                     </div>
 
@@ -1029,7 +1020,7 @@
                       <li class="mb-2">
                         <i class="fas fa-check text-success me-2"></i>
                         <strong id="enterprisePosts"
-                          >300 Posts per month (Lifetime access)</strong
+                          >300 Posts Per Month (Forever)</strong
                         >
                       </li>
                       <li class="mb-2">
@@ -1038,11 +1029,17 @@
                       </li>
                       <li class="mb-2">
                         <i class="fas fa-check text-success me-2"></i> Lifetime
-                        Access (one-time purchase product)
+                        Access
                       </li>
                       <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Priority
+                        <i class="fas fa-check text-success me-2"></i> VIP
                         Support
+                      </li>
+                      <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i> Early Access to New Features
+                      </li>
+                      <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i> No Recurring Charges
                       </li>
                     </ul>
 
@@ -1050,12 +1047,16 @@
                       class="btn btn-danger w-100 fw-bold mt-auto"
                       onclick="initiateDodoPayment('enterprise')"
                     >
-                      <i class="fas fa-crown me-2"></i>Buy Lifetime
+                      <i class="fas fa-crown me-2"></i>Get Lifetime
                     </button>
                   </div>
                 </div>
               </div>
             </div>
+
+            <p style="text-align: center; margin-top: 3rem; color: #666;">
+              <i class="fas fa-lock"></i> Secure checkout powered by Dodo Payments
+            </p>
           </div>
         </div>
       </div>

@@ -586,7 +586,7 @@ function updateUI() {
   setText("settingsCreditsDisplay", credits);
   setText(
     "settingsCreditsSubtext",
-    `${credits} / ${maxCredits} credits remaining`
+    `${credits} / ${maxCredits} posts remaining`
   );
   setStyle("settingsProgressDisplay", "width", `${progressPercent}%`);
 
@@ -1788,7 +1788,14 @@ function updatePricingDisplay() {
       `${plan}Posts`,
       `${data.posts} Posts Per ${cycle === "yearly" ? "Year" : "Month"}`
     );
-    setText(`${plan}Billing`, cycle === "yearly" ? "/year" : "/month");
+    
+    // Special handling for enterprise/lifetime plan
+    if (plan === "enterprise") {
+      setText(`${plan}Billing`, "one-time payment");
+      setText(`${plan}Posts`, `${data.posts} Posts Per Month (Forever)`);
+    } else {
+      setText(`${plan}Billing`, cycle === "yearly" ? "/year" : "/month");
+    }
   });
 }
 
