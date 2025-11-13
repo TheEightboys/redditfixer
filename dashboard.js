@@ -1226,6 +1226,7 @@ async function handlePaymentReturn() {
     // Try the new /api/payment/success endpoint first (fallback if webhook failed)
     let result;
     try {
+      console.log("📡 Calling /api/payment/success endpoint...");
       const successResponse = await fetch(`${API_URL}/api/payment/success`, {
         method: "POST",
         headers: {
@@ -1241,23 +1242,42 @@ async function handlePaymentReturn() {
           email: verifyPayload.email,
         }),
       });
+      
+      console.log(`Payment success response status: ${successResponse.status}`);
+      
+      if (!successResponse.ok) {
+        console.warn(`⚠️ Payment success returned ${successResponse.status}, trying verify endpoint...`);
+        throw new Error(`HTTP ${successResponse.status}`);
+      }
+      
       result = await successResponse.json();
       console.log("✅ Payment success endpoint called:", result);
     } catch (fallbackError) {
       console.warn("⚠️ Payment success endpoint failed, trying verify endpoint:", fallbackError);
       // Fallback to old verify endpoint
-      const response = await fetch(`${API_URL}/api/payment/verify`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify(verifyPayload),
-      });
-      result = await response.json();
+      try {
+        const response = await fetch(`${API_URL}/api/payment/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify(verifyPayload),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Verify endpoint returned ${response.status}`);
+        }
+        
+        result = await response.json();
+        console.log("✅ Verify endpoint success:", result);
+      } catch (verifyError) {
+        console.error("❌ Both endpoints failed:", verifyError);
+        throw new Error("Failed to activate plan: " + verifyError.message);
+      }
     }
 
-    if (result.success) {
+    if (result && result.success) {
       console.log("✅ Payment verified!");
 
       // Clear pending payment
@@ -1273,7 +1293,8 @@ async function handlePaymentReturn() {
       // Show success modal with plan details
       showPaymentSuccessModal();
     } else {
-      throw new Error(result.error || "Payment verification failed");
+      console.error("❌ Payment result:", result);
+      throw new Error(result?.error || "Payment verification failed");
     }
   } catch (error) {
     console.error("❌ Payment verification error:", error);
