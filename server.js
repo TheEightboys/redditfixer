@@ -107,6 +107,20 @@ async function callGeminiAPI(prompt, temperature = 0.7) {
 // ==========================================
 // ROUTES
 // ==========================================
+
+// CORS diagnostic endpoint — helps debug origin/header issues
+app.get("/api/cors-test", (req, res) => {
+  const origin = req.headers.origin || "no origin header";
+  const isAllowed = !origin || allowedOrigins.includes(origin);
+  res.json({
+    message: "✅ CORS test endpoint",
+    requestOrigin: origin,
+    isOriginAllowed: isAllowed,
+    allowedOrigins: allowedOrigins,
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get("/api/test", (req, res) => {
   res.json({ message: "✅ Server working!", timestamp: new Date().toISOString() });
 });
@@ -278,6 +292,74 @@ app.post("/api/payment/verify", async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Payment success endpoint — fallback if webhook fails
+// Call this from dashboard.html when redirected after payment
+app.post("/api/payment/success", async (req, res) => {
+  try {
+    const { userId, sessionId, planType, billingCycle, amount, email } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, error: "Missing userId" });
+    }
+
+    console.log(`\n✅ Payment success endpoint called for user ${userId}`);
+    console.log(`   Session ID: ${sessionId}`);
+    console.log(`   Plan: ${planType}, Billing: ${billingCycle}`);
+
+    // Set default values if missing
+    const plan = planType || "starter";
+    const cycle = billingCycle || "monthly";
+    const planLimits = {
+      starter: 150,
+      professional: 250,
+      enterprise: 300,
+    };
+    const credits = planLimits[plan] || 150;
+
+    const expiryDate = new Date();
+    if (cycle === "yearly") {
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    } else {
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
+    }
+
+    // Activate/update the plan
+    const { data: planData, error: planError } = await supabase
+      .from("user_plans")
+      .upsert({
+        user_id: userId,
+        plan_type: plan,
+        posts_per_month: credits,
+        credits_remaining: credits,
+        billing_cycle: cycle,
+        status: "active",
+        amount: amount || 0,
+        activated_at: new Date().toISOString(),
+        expires_at: expiryDate.toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" })
+      .select()
+      .single();
+
+    if (planError) {
+      console.error("❌ Plan activation error:", planError);
+      return res.status(500).json({ success: false, error: planError.message });
+    }
+
+    console.log(`✅ Plan activated successfully for user ${userId}`);
+    console.log(`   Credits: ${credits}, Expires: ${expiryDate.toISOString()}`);
+
+    res.json({
+      success: true,
+      message: "Plan activated successfully",
+      plan: planData,
+    });
+  } catch (error) {
+    console.error("❌ Payment success error:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
