@@ -315,6 +315,34 @@
 
       <div class="content-area">
         <div id="aiGeneratorSection" class="content-section active">
+          <!-- User Profile Card at Top -->
+          <div class="row mb-4">
+            <div class="col-lg-10 mx-auto">
+              <div class="pricing-card-glass">
+                <div class="row g-4 text-center">
+                  <div class="col-md-4">
+                    <div>
+                      <div class="fw-bold display-6 text-reddit" id="profileTotalPosts">0</div>
+                      <small class="text-muted">Posts Created</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div>
+                      <div class="fw-bold display-6" id="profilePostsRemaining">5</div>
+                      <small class="text-muted">Posts Remaining</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div>
+                      <div class="fw-bold display-6 text-success" id="profileJoinDate">Nov 2025</div>
+                      <small class="text-muted">Member Since</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="row">
             <div class="col-lg-10 mx-auto">
               <div class="card shadow-sm">
@@ -931,161 +959,140 @@
 
             <div class="row g-4">
               <div class="col-lg-4">
-                <div class="card h-100 shadow-sm border-0">
-                  <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="card-title fw-bold mb-2">Free</h5>
-                    <div class="mb-4">
-                      <span class="display-5 fw-bold text-secondary">$0</span>
-                      <small class="text-muted">forever</small>
-                    </div>
-
-                    <ul class="list-unstyled mb-4">
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        <strong>5 Posts Per Month</strong>
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> AI Post
-                        Generation
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-times text-danger me-2"></i> Content
-                        Optimization
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Reddit
-                        Rules Fetching
-                      </li>
-                      <li class="mb-2 text-muted">
-                        <i class="fas fa-times text-danger me-2"></i> Post
-                        Scheduling
-                      </li>
-                      <li class="mb-2 text-muted">
-                        <i class="fas fa-times text-danger me-2"></i> Priority
-                        Support
-                      </li>
-                    </ul>
-
-                    <button class="btn btn-secondary w-100 fw-bold mt-auto" disabled>
-                      <i class="fas fa-check me-2"></i>Your Current Plan
-                    </button>
+                <div class="pricing-card-glass h-100">
+                  <div class="pricing-header">
+                    <h5 class="pricing-title">Free</h5>
+                    <div class="pricing-price">$0</div>
+                    <div class="pricing-period">forever</div>
                   </div>
+
+                  <ul class="pricing-features">
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      <strong>5 Posts Per Month</strong>
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      AI Post Generation
+                    </li>
+                    <li>
+                      <i class="fas fa-times" style="color: #ef4444;"></i>
+                      Content Optimization
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Reddit Rules Fetching
+                    </li>
+                    <li>
+                      <i class="fas fa-times" style="color: #ef4444;"></i>
+                      Post Scheduling
+                    </li>
+                    <li>
+                      <i class="fas fa-times" style="color: #ef4444;"></i>
+                      Priority Support
+                    </li>
+                  </ul>
+
+                  <button class="pricing-cta primary w-100" disabled style="opacity: 0.7;">
+                    <i class="fas fa-check me-2"></i>Your Current Plan
+                  </button>
                 </div>
               </div>
 
               <div class="col-lg-4">
-                <div
-                  class="card h-100 shadow-lg border-0 position-relative"
-                  style="transform: scale(1.05)"
-                >
-                  <div
-                    class="position-absolute top-0 start-50 translate-middle"
+                <div class="pricing-card-glass h-100 popular">
+                  <div class="pricing-badge">MOST POPULAR</div>
+                  <div class="pricing-header">
+                    <h5 class="pricing-title">Professional</h5>
+                    <div class="pricing-price">
+                      <span id="professionalPrice">$2.29</span>
+                    </div>
+                    <div class="pricing-period">
+                      <span id="professionalBilling">/month</span>
+                    </div>
+                  </div>
+
+                  <ul class="pricing-features">
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      <strong id="professionalPosts">250 Posts Per Month</strong>
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Advanced AI Models
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Unlimited Optimization
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Post Scheduling
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Priority Support
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Analytics Dashboard
+                    </li>
+                  </ul>
+
+                  <button
+                    class="pricing-cta primary w-100"
+                    onclick="initiateDodoPayment('professional')"
                   >
-                    <span class="badge bg-warning text-dark px-3 py-2"
-                      >MOST POPULAR</span
-                    >
-                  </div>
-                  <div class="card-body p-4 pt-5 d-flex flex-column">
-                    <h5 class="card-title fw-bold mb-2">Professional</h5>
-                    <div class="mb-4">
-                      <span
-                        class="display-5 fw-bold text-warning"
-                        id="professionalPrice"
-                        >$2.29</span
-                      >
-                      <small class="text-muted">
-                        <span id="professionalBilling">/month</span>
-                      </small>
-                    </div>
-
-                    <ul class="list-unstyled mb-4">
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        <strong id="professionalPosts"
-                          >250 Posts Per Month</strong
-                        >
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Advanced
-                        AI Models
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Unlimited
-                        Optimization
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Post
-                        Scheduling
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Priority
-                        Support
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Analytics
-                        Dashboard
-                      </li>
-                    </ul>
-
-                    <button
-                      class="btn btn-warning w-100 fw-bold mt-auto"
-                      onclick="initiateDodoPayment('professional')"
-                    >
-                      <i class="fas fa-rocket me-2"></i>Upgrade Now
-                    </button>
-                  </div>
+                    <i class="fas fa-rocket me-2"></i>Upgrade Now
+                  </button>
                 </div>
               </div>
 
               <div class="col-lg-4">
-                <div class="card h-100 shadow-sm border-0">
-                  <div class="card-body p-4 d-flex flex-column">
-                    <h5 class="card-title fw-bold mb-2">Lifetime Access</h5>
-                    <div class="mb-4">
-                      <span
-                        class="display-5 fw-bold text-danger"
-                        id="enterprisePrice"
-                        >$29.00</span
-                      >
-                      <small class="text-muted">
-                        <span id="enterpriseBilling">one-time payment</span>
-                      </small>
+                <div class="pricing-card-glass h-100">
+                  <div class="pricing-header">
+                    <h5 class="pricing-title">Lifetime Access</h5>
+                    <div class="pricing-price alternate">
+                      <span id="enterprisePrice">$29.00</span>
                     </div>
-
-                    <ul class="list-unstyled mb-4">
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i>
-                        <strong id="enterprisePosts"
-                          >300 Posts Per Month (Forever)</strong
-                        >
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> All
-                        Professional Features
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Lifetime
-                        Access
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> VIP
-                        Support
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> Early Access to New Features
-                      </li>
-                      <li class="mb-2">
-                        <i class="fas fa-check text-success me-2"></i> No Recurring Charges
-                      </li>
-                    </ul>
-
-                    <button
-                      class="btn btn-danger w-100 fw-bold mt-auto"
-                      onclick="initiateDodoPayment('enterprise')"
-                    >
-                      <i class="fas fa-crown me-2"></i>Get Lifetime
-                    </button>
+                    <div class="pricing-period">
+                      <span id="enterpriseBilling">one-time payment</span>
+                    </div>
                   </div>
+
+                  <ul class="pricing-features">
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      <strong id="enterprisePosts">300 Posts Per Month (Forever)</strong>
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      All Professional Features
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Lifetime Access
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      VIP Support
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      Early Access to New Features
+                    </li>
+                    <li>
+                      <i class="fas fa-check" style="color: #10b981;"></i>
+                      No Recurring Charges
+                    </li>
+                  </ul>
+
+                  <button
+                    class="pricing-cta secondary w-100"
+                    onclick="initiateDodoPayment('enterprise')"
+                  >
+                    <i class="fas fa-crown me-2"></i>Get Lifetime
+                  </button>
                 </div>
               </div>
             </div>
