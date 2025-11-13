@@ -272,11 +272,43 @@ app.post("/api/generate-post", async (req, res) => {
 
     console.log(`\n[Generate Post] User: ${user.id}, Subreddit: ${subreddit}, Credits: ${plan.credits_remaining}`);
 
-    const prompt = `Create a Reddit post for r/${subreddit}. Topic: ${topic}. Style: ${style}. Rules: ${rules}. Return ONLY JSON: {"title":"...","content":"..."}`;
+    const prompt = `Create a Reddit post for r/${subreddit}. Topic: ${topic}. Style: ${style}. Rules: ${rules}. Return ONLY valid JSON: {"title":"...","content":"..."}`;
     
     const generated = await callGeminiAPI(prompt, 0.8);
-    const jsonMatch = generated.match(/\{[\s\S]*\}/);
-    const post = jsonMatch ? JSON.parse(jsonMatch[0]) : { title: "Post", content: generated };
+    
+    // Try to extract and parse JSON from the response
+    let post;
+    try {
+      // Try to find JSON in the response
+      const jsonMatch = generated.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        // Clean up common JSON issues
+        let jsonStr = jsonMatch[0];
+        // Remove trailing commas
+        jsonStr = jsonStr.replace(/,\s*([}\]])/g, '$1');
+        // Replace smart quotes with regular quotes
+        jsonStr = jsonStr.replace(/["]/g, '"').replace(/["]/g, '"');
+        // Try to parse
+        post = JSON.parse(jsonStr);
+        
+        // Ensure required fields exist
+        if (!post.title || !post.content) {
+          throw new Error("JSON missing title or content");
+        }
+      } else {
+        // No JSON found, treat entire response as content
+        post = {
+          title: topic || "Generated Post",
+          content: generated.substring(0, 500) // Limit content length
+        };
+      }
+    } catch (parseError) {
+      console.warn(`[Generate Post] JSON parse failed, using fallback:`, parseError.message);
+      post = {
+        title: topic || "Generated Post",
+        content: generated.substring(0, 500)
+      };
+    }
 
     // Deduct credit
     const updatedCredits = plan.credits_remaining - 1;
