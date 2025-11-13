@@ -87,21 +87,59 @@ const getAuthUser = async (req) => {
   return user;
 };
 
-async function callGeminiAPI(prompt, temperature = 0.7) {
+async function callGeminiAPI(prompt, temperature = 0.7, retries = 3) {
   if (!GEMINI_API_KEY) throw new Error("Gemini API key missing");
 
-  const response = await axios.post(
-    `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
-    {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature, topK: 40, topP: 0.95, maxOutputTokens: 2048 }
-    },
-    { timeout: 60000 }
-  );
+  let lastError;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      console.log(`[Gemini API] Attempt ${attempt}/${retries} for prompt...`);
+      
+      const response = await axios.post(
+        `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`,
+        {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature, topK: 40, topP: 0.95, maxOutputTokens: 2048 }
+        },
+        { timeout: 60000 }
+      );
 
-  const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!content) throw new Error("Invalid Gemini response");
-  return content;
+      const content = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!content) throw new Error("Invalid Gemini response");
+      
+      console.log(`[Gemini API] ✅ Success on attempt ${attempt}`);
+      return content;
+    } catch (error) {
+      lastError = error;
+      const status = error.response?.status;
+      const isRateLimited = status === 429;
+      const isServerError = status >= 500;
+      
+      console.error(`[Gemini API] Attempt ${attempt} failed:`, {
+        status,
+        message: error.message,
+        rateLimited: isRateLimited
+      });
+
+      // Retry on 429 (rate limit) or 5xx errors
+      if ((isRateLimited || isServerError) && attempt < retries) {
+        const delayMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000); // Exponential backoff, max 10s
+        console.log(`[Gemini API] Retrying in ${delayMs}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      } else {
+        break; // Don't retry on other errors or if out of retries
+      }
+    }
+  }
+
+  // All retries exhausted
+  if (lastError?.response?.status === 429) {
+    throw new Error("AI service is rate limited. Please try again in a moment.");
+  } else if (lastError?.response?.status >= 500) {
+    throw new Error("AI service is temporarily unavailable. Please try again later.");
+  } else {
+    throw lastError || new Error("Gemini API call failed");
+  }
 }
 
 // ==========================================
@@ -214,15 +252,25 @@ app.post("/api/generate-post", async (req, res) => {
     const user = await getAuthUser(req);
     const { subreddit, topic, style, rules } = req.body;
 
+    if (!subreddit || !topic) {
+      return res.status(400).json({ success: false, error: "Missing subreddit or topic" });
+    }
+
     const { data: plan } = await supabase
       .from("user_plans")
       .select("*")
       .eq("user_id", user.id)
       .single();
 
-    if (plan.credits_remaining <= 0) {
-      return res.status(402).json({ success: false, error: "No credits remaining" });
+    if (!plan) {
+      return res.status(404).json({ success: false, error: "User plan not found" });
     }
+
+    if (plan.credits_remaining <= 0) {
+      return res.status(402).json({ success: false, error: "No credits remaining. Upgrade your plan." });
+    }
+
+    console.log(`\n[Generate Post] User: ${user.id}, Subreddit: ${subreddit}, Credits: ${plan.credits_remaining}`);
 
     const prompt = `Create a Reddit post for r/${subreddit}. Topic: ${topic}. Style: ${style}. Rules: ${rules}. Return ONLY JSON: {"title":"...","content":"..."}`;
     
@@ -230,11 +278,14 @@ app.post("/api/generate-post", async (req, res) => {
     const jsonMatch = generated.match(/\{[\s\S]*\}/);
     const post = jsonMatch ? JSON.parse(jsonMatch[0]) : { title: "Post", content: generated };
 
+    // Deduct credit
+    const updatedCredits = plan.credits_remaining - 1;
     await supabase
       .from("user_plans")
-      .update({ credits_remaining: plan.credits_remaining - 1 })
+      .update({ credits_remaining: updatedCredits })
       .eq("user_id", user.id);
 
+    // Log history
     await supabase.from("post_history").insert({
       user_id: user.id,
       subreddit,
@@ -243,9 +294,18 @@ app.post("/api/generate-post", async (req, res) => {
       post_type: "generated"
     });
 
-    res.json({ success: true, post, creditsRemaining: plan.credits_remaining - 1 });
+    console.log(`[Generate Post] ✅ Success! Credits remaining: ${updatedCredits}`);
+
+    res.json({ success: true, post, creditsRemaining: updatedCredits });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error("[Generate Post] ❌ Error:", error.message);
+    
+    // Return user-friendly error messages
+    const status = error.message.includes("rate limited") ? 429 : 500;
+    res.status(status).json({ 
+      success: false, 
+      error: error.message || "Failed to generate post" 
+    });
   }
 });
 
@@ -255,19 +315,47 @@ app.post("/api/optimize-post", async (req, res) => {
     const user = await getAuthUser(req);
     const { subreddit, content, style, rules } = req.body;
 
-    const { data: plan } = await supabase.from("user_plans").select("*").eq("user_id", user.id).single();
-    if (plan.credits_remaining <= 0) {
-      return res.status(402).json({ error: "No credits" });
+    if (!subreddit || !content) {
+      return res.status(400).json({ success: false, error: "Missing subreddit or content" });
     }
+
+    const { data: plan } = await supabase
+      .from("user_plans")
+      .select("*")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!plan) {
+      return res.status(404).json({ success: false, error: "User plan not found" });
+    }
+
+    if (plan.credits_remaining <= 0) {
+      return res.status(402).json({ success: false, error: "No credits remaining. Upgrade your plan." });
+    }
+
+    console.log(`\n[Optimize Post] User: ${user.id}, Subreddit: ${subreddit}, Credits: ${plan.credits_remaining}`);
 
     const prompt = `Optimize for r/${subreddit}. Original: ${content}. Style: ${style}. Rules: ${rules}. Return only optimized text.`;
     const optimized = await callGeminiAPI(prompt, 0.7);
 
-    await supabase.from("user_plans").update({ credits_remaining: plan.credits_remaining - 1 }).eq("user_id", user.id);
+    // Deduct credit
+    const updatedCredits = plan.credits_remaining - 1;
+    await supabase
+      .from("user_plans")
+      .update({ credits_remaining: updatedCredits })
+      .eq("user_id", user.id);
 
-    res.json({ success: true, optimizedPost: optimized.trim(), creditsRemaining: plan.credits_remaining - 1 });
+    console.log(`[Optimize Post] ✅ Success! Credits remaining: ${updatedCredits}`);
+
+    res.json({ success: true, optimizedPost: optimized.trim(), creditsRemaining: updatedCredits });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error("[Optimize Post] ❌ Error:", error.message);
+    
+    const status = error.message.includes("rate limited") ? 429 : 500;
+    res.status(status).json({ 
+      success: false, 
+      error: error.message || "Failed to optimize post" 
+    });
   }
 });
 
