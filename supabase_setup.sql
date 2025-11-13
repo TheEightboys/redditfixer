@@ -101,6 +101,24 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 -- =====================================================
+-- 5. FEEDBACK TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS feedback (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT,
+    feedback_type TEXT NOT NULL CHECK (
+        feedback_type IN ('general', 'bug', 'feature', 'improvement')
+    ),
+    message TEXT NOT NULL,
+    status TEXT DEFAULT 'new' CHECK (
+        status IN ('new', 'reviewed', 'resolved', 'archived')
+    ),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =====================================================
 -- 5. INDEXES FOR PERFORMANCE
 -- =====================================================
 CREATE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
@@ -109,6 +127,8 @@ CREATE INDEX IF NOT EXISTS idx_post_history_user_id ON post_history(user_id);
 CREATE INDEX IF NOT EXISTS idx_post_history_created_at ON post_history(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_transaction_id ON payments(transaction_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_user_id ON feedback(user_id);
+CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON feedback(created_at DESC);
 
 -- =====================================================
 -- 6. ROW LEVEL SECURITY (RLS) - CRITICAL FIX
@@ -118,6 +138,7 @@ ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feedback ENABLE ROW LEVEL SECURITY;
 
 -- =====================================================
 -- DROP OLD POLICIES (if they exist)
@@ -209,6 +230,26 @@ FOR SELECT
 TO authenticated
 USING (auth.uid() = user_id);
 
+-- Feedback Policies
+CREATE POLICY "Service role has full access to feedback"
+ON feedback
+FOR ALL
+TO service_role
+USING (true)
+WITH CHECK (true);
+
+CREATE POLICY "Users can insert own feedback"
+ON feedback
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can read own feedback"
+ON feedback
+FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
 -- =====================================================
 -- 7. GRANT PERMISSIONS TO SERVICE ROLE (CRITICAL)
 -- =====================================================
@@ -216,6 +257,7 @@ GRANT ALL ON user_profiles TO service_role;
 GRANT ALL ON user_plans TO service_role;
 GRANT ALL ON post_history TO service_role;
 GRANT ALL ON payments TO service_role;
+GRANT ALL ON feedback TO service_role;
 
 -- Grant usage on sequences (needed for auto-increment)
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO service_role;

@@ -138,6 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     initBootstrapComponents();
 
     initializeEventListeners();
+    setupFeedbackHandlers();
     updatePricingDisplay();
     checkPendingPayment(); // Check if user has pending payment
 
@@ -339,7 +340,7 @@ function showDataLoadingPlaceholders() {
   setValue("settingsDisplayName", "");
   setValue("settingsBio", "");
   setText("settingsCreditsDisplay", loadingText);
-  setText("settingsCreditsSubtext", "Loading credit info...");
+  setText("settingsCreditsSubtext", "Loading post info...");
   setStyle("settingsProgressDisplay", "width", "100%");
 }
 
@@ -353,7 +354,7 @@ function showDataErrorState(errorMessage) {
   setText("profileEmail", "Could not load data");
   setValue("settingsEmail", "Error loading email");
   setText("settingsCreditsDisplay", "!");
-  setText("settingsCreditsSubtext", "Error loading credits");
+  setText("settingsCreditsSubtext", "Error loading posts");
   showToast(`Failed to load data: ${errorMessage}`, "error");
 }
 
@@ -411,8 +412,8 @@ async function loadUserData() {
   userPlan = {
     user_id: currentUser?.id || "temp-user-id",
     plan_type: "free",
-    credits_remaining: 10,
-    posts_per_month: 10,
+    credits_remaining: 5,
+    posts_per_month: 5,
     billing_cycle: "monthly",
     status: "active",
     activated_at: new Date().toISOString(),
@@ -652,10 +653,16 @@ function checkAndShowCurrentPlan() {
       currentPlanSection.style.display = "block";
       updateCurrentPlanCard();
     }
+    // Show Content Optimizer for paid users
+    const optimizerLink = document.querySelector('[data-page="contentOptimizer"]');
+    if (optimizerLink) optimizerLink.style.display = "block";
   } else {
     console.log("ℹ️ User has free plan - showing pricing");
     if (pricingSection) pricingSection.style.display = "block";
     if (currentPlanSection) currentPlanSection.style.display = "none";
+    // Hide Content Optimizer for free users
+    const optimizerLink = document.querySelector('[data-page="contentOptimizer"]');
+    if (optimizerLink) optimizerLink.style.display = "none";
   }
 }
 
@@ -923,9 +930,9 @@ async function handleSignOut() {
     console.log("✅ Signed out successfully");
     showToast("Signed out successfully", "success");
 
-    // Force reload to clear everything
+    // Redirect to landing page
     setTimeout(() => {
-      window.location.reload();
+      window.location.href = "index.html";
     }, 500);
   } catch (error) {
     console.error("❌ Sign out error:", error);
@@ -2238,7 +2245,103 @@ function copyToClipboard(text, successMessage) {
 }
 
 // ============================================
+// FEEDBACK FUNCTIONS
+// ============================================
+function openFeedbackModal() {
+  const feedbackModal = new bootstrap.Modal(
+    document.getElementById("feedbackModal")
+  );
+  feedbackModal.show();
+}
+
+function setupFeedbackHandlers() {
+  const feedbackMessage = document.getElementById("feedbackMessage");
+  const feedbackCharCount = document.getElementById("feedbackCharCount");
+  const submitFeedbackBtn = document.getElementById("submitFeedbackBtn");
+
+  // Update character count
+  if (feedbackMessage) {
+    feedbackMessage.addEventListener("input", (e) => {
+      const count = e.target.value.length;
+      if (feedbackCharCount) {
+        feedbackCharCount.textContent = `${count} / 1000 characters`;
+      }
+    });
+  }
+
+  // Submit feedback
+  if (submitFeedbackBtn) {
+    submitFeedbackBtn.addEventListener("click", async () => {
+      const feedbackType = document.getElementById("feedbackType")?.value;
+      const message = feedbackMessage?.value?.trim();
+      const email = document.getElementById("feedbackEmail")?.value?.trim();
+
+      if (!feedbackType || !message) {
+        showToast("Please fill in all required fields", "warning");
+        return;
+      }
+
+      setButtonLoading(
+        "submitFeedbackBtn",
+        true,
+        '<span class="spinner-border spinner-border-sm me-2"></span>Sending...'
+      );
+
+      try {
+        const session = await supabaseClient.auth.getSession();
+        const token = session?.data?.session?.access_token;
+
+        if (!token) {
+          showToast("Please sign in to submit feedback", "error");
+          setButtonLoading("submitFeedbackBtn", false, "Send Feedback");
+          return;
+        }
+
+        const response = await fetch(`${API_URL}/api/feedback`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            feedbackType,
+            message,
+            email: email || currentUser?.email,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          showToast("✅ Thank you! Your feedback has been sent.", "success");
+
+          // Clear form
+          if (feedbackMessage) feedbackMessage.value = "";
+          document.getElementById("feedbackType").value = "general";
+          document.getElementById("feedbackEmail").value = "";
+          if (feedbackCharCount) feedbackCharCount.textContent = "0 / 1000 characters";
+
+          // Close modal
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("feedbackModal")
+          );
+          if (modal) modal.hide();
+        } else {
+          showToast(data.error || "Failed to submit feedback", "error");
+        }
+      } catch (error) {
+        console.error("❌ Feedback submission error:", error);
+        showToast("Error submitting feedback: " + error.message, "error");
+      } finally {
+        setButtonLoading("submitFeedbackBtn", false, "Send Feedback");
+      }
+    });
+  }
+}
+
+// ============================================
 // GLOBAL WINDOW EXPORTS
 // ============================================
 window.navigateToPage = navigateToPage;
 window.initiateDodoPayment = initiateDodoPayment;
+window.openFeedbackModal = openFeedbackModal;

@@ -272,7 +272,27 @@ app.post("/api/generate-post", async (req, res) => {
 
     console.log(`\n[Generate Post] User: ${user.id}, Subreddit: ${subreddit}, Credits: ${plan.credits_remaining}`);
 
-    const prompt = `Create a Reddit post for r/${subreddit}. Topic: ${topic}. Style: ${style}. Rules: ${rules}. Return ONLY valid JSON: {"title":"...","content":"..."}`;
+    const systemPrompt = `You are an expert Reddit content creator specializing in viral posts. You understand community dynamics, engagement patterns, and what makes posts succeed.`;
+    
+    const prompt = `${systemPrompt}
+
+Create an authentic, engaging Reddit post for r/${subreddit}.
+
+Topic/Idea: ${topic}
+Writing Style: ${style}
+Community Rules: ${rules}
+
+Guidelines:
+- Write naturally as a real Reddit user (casual tone, authentic voice)
+- Follow all community rules strictly
+- Make it relatable and conversation-starting
+- Avoid clickbait, spam, or self-promotion language
+- Match the community's culture and values
+- Title should be clear, specific, and compelling (80 chars max)
+- Content should be well-formatted with proper spacing/sections
+
+Return ONLY valid JSON with no markdown or extra text:
+{"title":"post title here","content":"post body here"}`;
     
     const generated = await callGeminiAPI(prompt, 0.8);
     
@@ -367,7 +387,29 @@ app.post("/api/optimize-post", async (req, res) => {
 
     console.log(`\n[Optimize Post] User: ${user.id}, Subreddit: ${subreddit}, Credits: ${plan.credits_remaining}`);
 
-    const prompt = `Optimize for r/${subreddit}. Original: ${content}. Style: ${style}. Rules: ${rules}. Return only optimized text.`;
+    const systemPrompt = `You are an expert Reddit content strategist. You enhance posts to maximize engagement, visibility, and community reception while maintaining authenticity.`;
+    
+    const prompt = `${systemPrompt}
+
+Optimize this Reddit post for r/${subreddit}:
+
+Original Post:
+${content}
+
+Optimization Goal: ${style}
+Community Rules: ${rules}
+
+Enhancement Instructions:
+- Improve clarity, readability, and engagement
+- Fix grammar and formatting while keeping the authentic voice
+- Strengthen the hook/opening to capture attention
+- Add section breaks or formatting if needed
+- Ensure compliance with community guidelines
+- Make it more discussion-inviting if applicable
+- Maintain the original intent and key information
+
+Return ONLY the optimized post text (no markdown formatting, no JSON, just the improved post content).`;
+    
     const optimized = await callGeminiAPI(prompt, 0.7);
 
     // Deduct credit
@@ -534,6 +576,81 @@ app.post("/api/payment/success", async (req, res) => {
 // NOTE: webhook handling is implemented in `api/dodo/webhook.js` and
 // mounted above with `app.post('/api/dodo/webhook', express.json(), webhookHandler)`.
 // The inline handler was removed to avoid duplicate processing.
+
+// ==========================================
+// FEEDBACK ENDPOINTS
+// ==========================================
+app.post("/api/feedback", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ success: false, error: "Missing authorization header" });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ success: false, error: "Unauthorized" });
+    }
+
+    const { feedbackType, message, email } = req.body;
+
+    if (!feedbackType || !message) {
+      return res.status(400).json({ success: false, error: "Missing required fields" });
+    }
+
+    if (message.length > 1000) {
+      return res.status(400).json({ success: false, error: "Message too long (max 1000 characters)" });
+    }
+
+    const { data, error } = await supabase
+      .from("feedback")
+      .insert({
+        user_id: user.id,
+        email: email || user.email,
+        feedback_type: feedbackType,
+        message: message,
+        status: "new",
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("❌ Feedback insert error:", error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    console.log(`✅ Feedback submitted by ${user.email}:`, data);
+    return res.json({
+      success: true,
+      message: "Thank you for your feedback! We appreciate it.",
+      feedback: data,
+    });
+  } catch (error) {
+    console.error("❌ Feedback endpoint error:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get all feedback (admin endpoint)
+app.get("/api/feedback/all", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("feedback")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    return res.json({ success: true, feedback: data, count: data.length });
+  } catch (error) {
+    console.error("❌ Feedback fetch error:", error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
 
 // ==========================================
 // ERROR HANDLING

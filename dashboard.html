@@ -183,12 +183,16 @@
           <i class="fas fa-crown"></i>
           <span>Pricing Plans</span>
         </a>
+        <a href="#" class="sidebar-item" onclick="openFeedbackModal()">
+          <i class="fas fa-comments"></i>
+          <span>Send Feedback</span>
+        </a>
       </div>
 
       <div class="sidebar-footer">
         <div class="upgrade-section">
           <div class="credits-display">
-            <span id="creditsLeft" class="credits-text">0</span> Credits left
+            <span id="creditsLeft" class="credits-text">0</span> Posts left
           </div>
           <button class="btn-upgrade-plan" onclick="navigateToPage('pricing')">
             Upgrade plan
@@ -240,7 +244,7 @@
               <li><hr class="dropdown-divider" /></li>
               <li class="px-3 py-2">
                 <div class="d-flex justify-content-between align-items-center">
-                  <small class="text-muted">Credits Used</small>
+                  <small class="text-muted">Posts Used</small>
                   <small class="fw-bold text-reddit" id="dropdownCreditsUsed"
                     >0 / 10</small
                   >
@@ -705,7 +709,7 @@
                         <h3 class="fw-bold text-success mb-0" id="creditsUsed">
                           0
                         </h3>
-                        <small class="text-muted">Credits Used</small>
+                        <small class="text-muted">Posts Used</small>
                       </div>
                     </div>
                     <div class="col-md-4 text-center">
@@ -768,7 +772,7 @@
               <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
                   <h5 class="fw-bold mb-4">
-                    <i class="fas fa-coins text-warning me-2"></i>Your Credits
+                    <i class="fas fa-coins text-warning me-2"></i>Your Posts
                   </h5>
 
                   <div class="p-3 bg-light rounded mb-3">
@@ -779,7 +783,7 @@
                       0
                     </h3>
                     <small class="text-muted" id="settingsCreditsSubtext"
-                      >Credits available</small
+                      >Posts available</small
                     >
                     <div class="progress mt-2" style="height: 8px">
                       <div
@@ -1231,6 +1235,80 @@
             </button>
             <button type="button" class="btn btn-danger" id="deleteAccountBtn">
               <i class="fas fa-trash me-2"></i>Delete My Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+          <div class="modal-header border-bottom-0 bg-light">
+            <h5 class="modal-title fw-bold">
+              <i class="fas fa-comments text-primary me-2"></i>Send Us Feedback
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body p-4">
+            <p class="text-muted small mb-3">
+              Help us improve ReddiGen! Tell us what you think, report bugs, or
+              suggest features.
+            </p>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Feedback Type</label>
+              <select class="form-select" id="feedbackType">
+                <option value="general">General Feedback</option>
+                <option value="bug">Bug Report</option>
+                <option value="feature">Feature Request</option>
+                <option value="improvement">Improvement Suggestion</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Your Message</label>
+              <textarea
+                class="form-control"
+                id="feedbackMessage"
+                rows="6"
+                placeholder="Tell us your thoughts, ideas, or report issues..."
+                maxlength="1000"
+              ></textarea>
+              <small class="text-muted" id="feedbackCharCount"
+                >0 / 1000 characters</small
+              >
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Email (optional)</label>
+              <input
+                type="email"
+                class="form-control"
+                id="feedbackEmail"
+                placeholder="your@email.com"
+              />
+              <small class="text-muted"
+                >So we can follow up with you if needed</small
+              >
+            </div>
+          </div>
+          <div class="modal-footer border-top-0">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="submitFeedbackBtn"
+            >
+              <i class="fas fa-paper-plane me-2"></i>Send Feedback
             </button>
           </div>
         </div>
