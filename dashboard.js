@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY =
 // ✅ CORRECT - This works for both localhost AND production
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? "http://localhost:3000"  // Local development
-  : "https://reddit-posts-content-giver.onrender.com";  // Production on Render
+  : "https://redditfixer.onrender.com";  // Production on Render (new backend)
 
 console.log('🌍 Current domain:', window.location.hostname);
 console.log('🔌 API URL:', API_URL);  // Production backend on Render
