@@ -1212,23 +1212,49 @@ async function handlePaymentReturn() {
     }
 
     // Verify payment on backend
-    const response = await fetch(`${API_URL}/api/payment/verify`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({
-        sessionId: finalSessionId,
-        plan: paymentData?.plan || "starter",
-        billingCycle: paymentData?.billingCycle || "monthly",
-        postsPerMonth: paymentData?.postsPerMonth || 50,
-        amount: paymentData?.amount || 9.99,
-        email: currentUser?.email,
-      }),
-    });
+    const verifyPayload = {
+      sessionId: finalSessionId,
+      userId: session.user?.id,
+      plan: paymentData?.plan || "starter",
+      billingCycle: paymentData?.billingCycle || "monthly",
+      postsPerMonth: paymentData?.postsPerMonth || 50,
+      amount: paymentData?.amount || 9.99,
+      email: currentUser?.email,
+    };
 
-    const result = await response.json();
+    // Try the new /api/payment/success endpoint first (fallback if webhook failed)
+    let result;
+    try {
+      const successResponse = await fetch(`${API_URL}/api/payment/success`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: session.user?.id,
+          sessionId: finalSessionId,
+          planType: verifyPayload.plan,
+          billingCycle: verifyPayload.billingCycle,
+          amount: verifyPayload.amount,
+          email: verifyPayload.email,
+        }),
+      });
+      result = await successResponse.json();
+      console.log("✅ Payment success endpoint called:", result);
+    } catch (fallbackError) {
+      console.warn("⚠️ Payment success endpoint failed, trying verify endpoint:", fallbackError);
+      // Fallback to old verify endpoint
+      const response = await fetch(`${API_URL}/api/payment/verify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(verifyPayload),
+      });
+      result = await response.json();
+    }
 
     if (result.success) {
       console.log("✅ Payment verified!");
