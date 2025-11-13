@@ -10,7 +10,9 @@ let supabase = null;
 function getSupabaseClient() {
   if (!supabase) {
     const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    // Accept either SUPABASE_SERVICE_ROLE_KEY (recommended for server-side) or
+    // SUPABASE_SERVICE_KEY to be compatible with the rest of the app and different env setups.
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
     
     if (!url || !key) {
       console.error('❌ Supabase credentials missing!');

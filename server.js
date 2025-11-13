@@ -22,7 +22,8 @@ const allowedOrigins = [
   "http://localhost:5500",
   "http://localhost:3000",
    "https://www.redrule.site",           // ✅ ADD THIS - Your new domain with www
-  "https://redrule.site", 
+  "https://redrule.site",
+  "https://redditfixer.onrender.com",
   "https://reddit-posts-content-giver.vercel.app",
   "https://reddit-posts-content-giver-git-main-theboys-projects-3cf681c8.vercel.app",
   "https://reddit-posts-content-giver-8wf66t2sf-theboys-projects-3cf681c8.vercel.app",
@@ -33,27 +34,18 @@ const allowedOrigins = [
 // ==========================================
 // CORS MIDDLEWARE
 // ==========================================
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin || allowedOrigins[0]);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-  }
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
-
 const corsOptions = {
   origin: (origin, callback) => {
+    // allow requests with no origin (like server-to-server) or from our allowed list
     if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(null, false);
+    return callback(new Error('Not allowed by CORS'), false);
   },
   credentials: true,
 };
 
+// Use the official `cors` middleware so it handles preflight (OPTIONS) properly
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.post('/api/dodo/webhook', express.json(), webhookHandler);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -285,32 +277,9 @@ app.post("/api/payment/verify", async (req, res) => {
 });
 
 // Dodo webhook
-app.post("/api/dodo/webhook", async (req, res) => {
-  try {
-    const event = req.body;
-    if (event.type === "checkout.session.completed") {
-      const metadata = event.data?.object?.metadata || {};
-      if (metadata.userId) {
-        const expiryDate = new Date();
-        if (metadata.billingCycle === "yearly") expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-        else expiryDate.setMonth(expiryDate.getMonth() + 1);
-
-        await supabase.from("user_plans").upsert({
-          user_id: metadata.userId,
-          plan_type: metadata.planType,
-          posts_per_month: parseInt(metadata.postsPerMonth),
-          credits_remaining: parseInt(metadata.postsPerMonth),
-          billing_cycle: metadata.billingCycle,
-          status: "active",
-          expires_at: expiryDate.toISOString()
-        }, { onConflict: "user_id" });
-      }
-    }
-    res.json({ received: true });
-  } catch (error) {
-    res.status(500).json({ error: "Webhook failed" });
-  }
-});
+// NOTE: webhook handling is implemented in `api/dodo/webhook.js` and
+// mounted above with `app.post('/api/dodo/webhook', express.json(), webhookHandler)`.
+// The inline handler was removed to avoid duplicate processing.
 
 // ==========================================
 // ERROR HANDLING
