@@ -590,11 +590,6 @@ function updateUI() {
   );
   setStyle("settingsProgressDisplay", "width", `${progressPercent}%`);
 
-  // NEW: Update AI Generator Profile Stats Card
-  setText("profileTotalPosts", userHistory.length);
-  setText("profilePostsRemaining", credits);
-  setText("profileJoinDate", joinDate);
-
   // ============================================
   // NEW: UPDATE PLAN DISPLAY & CURRENT PLAN
   // ============================================

@@ -17,6 +17,150 @@
 }
 
 /* ============================================
+   CRITICAL FIX: SIDEBAR AND CONTENT LAYOUT
+   ============================================ */
+
+/* Sidebar must be fixed on left */
+.sidebar {
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 260px !important;
+    height: 100vh !important;
+    z-index: 1000 !important;
+    background-color: white;
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+/* Main content MUST start after sidebar */
+.main-content {
+    margin-left: 260px !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+    min-height: 100vh;
+    background-color: var(--bg-light);
+    width: calc(100% - 260px) !important;
+    max-width: calc(100% - 260px) !important;
+    box-sizing: border-box !important;
+}
+
+/* Top navbar - reduce height */
+.top-navbar {
+    margin: 0 !important;
+    padding: 0.75rem 1.5rem !important;
+    background-color: white;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Content area - start at top */
+.content-area {
+    padding: 1.5rem 2rem !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Content sections - no top spacing */
+.content-section {
+    display: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.content-section.active {
+    display: block !important;
+}
+
+/* Container fluid - proper width */
+.container-fluid {
+    padding: 0 15px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Row - Bootstrap fix for proper column display */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+}
+
+/* Force all columns to be visible */
+[class*="col-"] {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* Ensure pricing cards are visible */
+.col-lg-4 {
+    width: 33.333333% !important;
+    flex: 0 0 33.333333% !important;
+    max-width: 33.333333% !important;
+}
+
+@media (max-width: 991px) {
+    .col-lg-4 {
+        width: 50% !important;
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .col-lg-4 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Remove all top spacing */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0 !important;
+}
+
+.card {
+    margin-top: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Bootstrap spacing fixes */
+.mb-4 {
+    margin-bottom: 1rem !important;
+}
+
+.mt-4, .my-4, .mt-3, .my-3 {
+    margin-top: 0 !important;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.active {
+        transform: translateX(0);
+    }
+}
+/* ============================================
    GLOBAL STYLES
    ============================================ */
 * {
@@ -46,6 +190,7 @@ h1, h2, h3, h4, h5, h6 {
 p {
     color: var(--text-gray);
 }
+
 
 /* ============================================
    UTILITY CLASSES
@@ -173,6 +318,7 @@ p {
 
 .hero-badge {
     display: inline-block;
+
     padding: 0.5rem 1rem;
     background-color: rgba(255, 69, 0, 0.08);
     color: var(--reddit-orange);
@@ -478,6 +624,7 @@ p {
 .cta-content {
     max-width: 700px;
     margin: 0 auto;
+
 }
 
 .cta-title {
@@ -607,20 +754,16 @@ p {
     opacity: 0;
     pointer-events: none;
 }
+/* ============================================
+   FIX: SIDEBAR AND MAIN CONTENT ALIGNMENT
+   ============================================ */
 
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: var(--sidebar-width);
-    height: 100vh;
-    background-color: white;
-    border-right: 1px solid var(--border-color);
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-}
+/* Ensure sidebar stays fixed and on top */
+/* DUPLICATE RULES DELETED - SEE LINES 24-65 FOR CORRECT VERSIONS WITH !important */
+
+/* DUPLICATE RULES DELETED - SEE LINES 50-95 FOR CORRECT VERSIONS */
+
+/* DUPLICATE RESPONSIVE & SIDEBAR RULES DELETED - SEE LINES 135-160 FOR CORRECT VERSIONS */
 
 .sidebar-header {
     padding: 1.5rem;
@@ -673,22 +816,7 @@ p {
     margin-bottom: 1rem;
 }
 
-.main-content {
-    margin-left: var(--sidebar-width);
-    min-height: 100vh;
-}
-
-.top-navbar {
-    background-color: white;
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
+/* DELETED DUPLICATE - using the one at top of file */
 
 .user-avatar {
     width: 40px;
@@ -714,17 +842,7 @@ p {
     object-fit: cover;
 }
 
-.content-area {
-    padding: 2rem;
-}
-
-.content-section {
-    display: none;
-}
-
-.content-section.active {
-    display: block;
-}
+/* DELETED DUPLICATE - using the one at top of file */
 
 .card {
     background-color: white;
@@ -1030,6 +1148,26 @@ html {
 
 .btn-upgrade-plan:hover {
     background-color: #b84a4a; /* Darker red on hover */
+}
+
+/* ============================================
+   POPULAR CARD RESPONSIVE SCALING
+   ============================================ */
+.popular-card {
+    transform: scale(1.05);
+    transform-origin: center;
+}
+
+@media (max-width: 991px) {
+    .popular-card {
+        transform: scale(1.02);
+    }
+}
+
+@media (max-width: 767px) {
+    .popular-card {
+        transform: scale(1);
+    }
 }
 
 /* ============================================
