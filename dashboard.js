@@ -79,7 +79,7 @@ const PRICING_DATA = {
     },
     yearly: {
       price: 11.11,
-      posts: 1800,
+      posts: 150 * 12, // 150 posts per month * 12 months = 1800 posts per year
       productId: "pdt_RBEfQWVlN9bnWihieBQSt",
       checkoutUrl:
         "https://checkout.dodopayments.com/buy/pdt_RBEfQWVlN9bnWihieBQSt?quantity=1",
@@ -95,28 +95,30 @@ const PRICING_DATA = {
     },
     yearly: {
       price: 19.22,
-      posts: 3000,
+      posts: 250 * 12, // 250 posts per month * 12 months = 3000 posts per year
       productId: "pdt_gBCE38rNQm8x30iqAltc6",
       checkoutUrl:
         "https://checkout.dodopayments.com/buy/pdt_gBCE38rNQm8x30iqAltc6?quantity=1",
     },
   },
   enterprise: {
-    // Repurposed as LIFETIME plan (user requested last plan be lifetime)
+    // LIFETIME plan - one-time payment, 300 posts per month forever
     monthly: {
       price: 29.0,
-      posts: 300,
+      posts: 300, // 300 posts per month (refreshes monthly even on lifetime)
       productId: "pdt_RRL3ngdmgYA1bwfFcbOVl",
       checkoutUrl:
         "https://checkout.dodopayments.com/buy/pdt_RRL3ngdmgYA1bwfFcbOVl?quantity=1",
+      isLifetime: true, // Mark as lifetime plan
     },
     yearly: {
-      // Keep same checkout for yearly selection (redirect will still work). Lifetime is treated as a one-time product.
+      // Same as monthly for lifetime - one-time payment
       price: 29.0,
-      posts: 300,
+      posts: 300, // 300 posts per month (refreshes monthly even on lifetime)
       productId: "pdt_RRL3ngdmgYA1bwfFcbOVl",
       checkoutUrl:
         "https://checkout.dodopayments.com/buy/pdt_RRL3ngdmgYA1bwfFcbOVl?quantity=1",
+      isLifetime: true, // Mark as lifetime plan
     },
   },
 };

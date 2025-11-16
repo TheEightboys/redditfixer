@@ -147,23 +147,41 @@ async function handlePaymentSuccess(data) {
 
     // Step 3: Activate plan
     console.log('\n🚀 Step 3: Activating plan...');
+    
+    // Plan limits - posts per month for each plan
     const planLimits = {
       starter: 150,
       professional: 250,
-      enterprise: 300,
+      enterprise: 300, // Lifetime plan: 300 posts per month (renews monthly forever)
     };
 
     const credits = planLimits[planType] || 150;
-    const expiresAt = new Date();
     
-    if (billingCycle === 'yearly') {
+    // Calculate expiry date based on billing cycle
+    let expiresAt = null;
+    
+    if (planType === 'enterprise') {
+      // Lifetime plan - never expires (set to 100 years in future)
+      expiresAt = new Date();
+      expiresAt.setFullYear(expiresAt.getFullYear() + 100);
+      console.log('   Plan: LIFETIME (enterprise)');
+      console.log('   Credits per month:', credits);
+      console.log('   Expires: Never (', expiresAt.toISOString(), ')');
+    } else if (billingCycle === 'yearly') {
+      // Yearly plan - expires in 1 year
+      expiresAt = new Date();
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+      console.log('   Plan: YEARLY');
+      console.log('   Credits:', credits);
+      console.log('   Expires:', expiresAt.toISOString());
     } else {
+      // Monthly plan - expires in 1 month
+      expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 1);
+      console.log('   Plan: MONTHLY');
+      console.log('   Credits:', credits);
+      console.log('   Expires:', expiresAt.toISOString());
     }
-
-    console.log('   Credits:', credits);
-    console.log('   Expires:', expiresAt.toISOString());
 
     const { data: planData, error: planError } = await supabase
       .from('user_plans')

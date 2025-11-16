@@ -438,9 +438,20 @@ app.post("/api/payment/verify", async (req, res) => {
   try {
     const { userId, plan, billingCycle, postsPerMonth, amount } = req.body;
 
-    const expiryDate = new Date();
-    if (billingCycle === "yearly") expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-    else expiryDate.setMonth(expiryDate.getMonth() + 1);
+
+    // Calculate expiry date based on billing cycle and plan
+    let expiryDate = null;
+    if (plan === "enterprise") {
+      // Lifetime plan - never expires (set to 100 years in future)
+      expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 100);
+    } else if (billingCycle === "yearly") {
+      expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    } else {
+      expiryDate = new Date();
+      expiryDate.setMonth(expiryDate.getMonth() + 1);
+    }
 
     await supabase.from("user_plans").upsert({
       user_id: userId,
@@ -476,20 +487,35 @@ app.post("/api/payment/success", async (req, res) => {
     // Set default values if missing - use "professional" as default paid plan
     const plan = planType || "professional";
     const cycle = billingCycle || "monthly";
+    
+    // Plan limits - posts per month for each plan
     const planLimits = {
       starter: 150,
       professional: 250,
-      enterprise: 300,
+      enterprise: 300, // Lifetime plan: 300 posts per month (renews monthly forever)
     };
     const credits = planLimits[plan] || 250; // Default to professional (250 credits)
 
     console.log(`   Plan type: ${plan}, Billing cycle: ${cycle}, Credits: ${credits}`);
 
-    const expiryDate = new Date();
-    if (cycle === "yearly") {
+    // Calculate expiry date based on billing cycle
+    let expiryDate = null;
+    
+    if (plan === "enterprise") {
+      // Lifetime plan - never expires (set to 100 years in future)
+      expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 100);
+      console.log(`   Lifetime plan - expires: ${expiryDate.toISOString()}`);
+    } else if (cycle === "yearly") {
+      // Yearly plan - expires in 1 year
+      expiryDate = new Date();
       expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+      console.log(`   Yearly plan - expires: ${expiryDate.toISOString()}`);
     } else {
+      // Monthly plan - expires in 1 month
+      expiryDate = new Date();
       expiryDate.setMonth(expiryDate.getMonth() + 1);
+      console.log(`   Monthly plan - expires: ${expiryDate.toISOString()}`);
     }
 
     console.log(`   Expiry date: ${expiryDate.toISOString()}`);
