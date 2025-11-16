@@ -14,7 +14,7 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
    GLOBAL STATE
    ============================================ */
 let currentUser = null;
-let userCredits = 10;
+let userCredits = 5;
 let postHistory = [];
 
 /* ============================================
@@ -585,13 +585,13 @@ function updateUIAfterAuth() {
 
 function updateStatsDisplay() {
   // Calculate credits used
-  const creditsUsed = 10 - userCredits;
-  const creditsPercent = (creditsUsed / 10) * 100;
+  const creditsUsed = 5 - userCredits;
+  const creditsPercent = (creditsUsed / 5) * 100;
 
   // Update Dropdown Credits
   const dropdownCreditsUsed = document.getElementById("dropdownCreditsUsed");
   if (dropdownCreditsUsed) {
-    dropdownCreditsUsed.textContent = `${creditsUsed} / 10`;
+    dropdownCreditsUsed.textContent = `${creditsUsed} / 5`;
   }
 
   // Update Credits Progress Bar
@@ -630,7 +630,7 @@ function updateStatsDisplay() {
   // Update sidebar credits display
   const creditsDisplay = document.getElementById("creditsDisplay");
   if (creditsDisplay) {
-    creditsDisplay.textContent = `${userCredits} / 10`;
+    creditsDisplay.textContent = `${userCredits} / 5`;
   }
 }
 
@@ -729,7 +729,7 @@ function showToast(message, type = "info") {
 function updateCreditsDisplay() {
   const creditsDisplay = document.getElementById("creditsDisplay");
   if (creditsDisplay) {
-    creditsDisplay.textContent = `${userCredits} / 10`;
+    creditsDisplay.textContent = `${userCredits} / 5`;
   }
   saveToLocalStorage();
 }
