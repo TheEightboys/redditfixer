@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS user_plans (
     plan_type TEXT DEFAULT 'free' CHECK (
         plan_type IN ('free', 'starter', 'professional', 'enterprise')
     ),
-    posts_per_month INTEGER DEFAULT 10,
-    credits_remaining INTEGER DEFAULT 10,
+    posts_per_month INTEGER DEFAULT 5,
+    credits_remaining INTEGER DEFAULT 5,
     billing_cycle TEXT DEFAULT 'monthly' CHECK (
         billing_cycle IN ('monthly', 'yearly')
     ),
