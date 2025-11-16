@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - ReddiGen</title>
+    <title>Dashboard - Redrule</title>
+    <link rel="icon" type="image/png" href="redruleslogo.png">
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -118,181 +119,189 @@
         color: white;
       }
       
-      /* Pricing Cards - Solid & Professional */
+      /* Pricing Cards - Beautiful Gradient Style */
       .pricing-card {
         background: white;
-        border-radius: 4px;
-        border: 2px solid #ddd;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        border-radius: 24px;
+        padding: 3rem 2.5rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        overflow: visible;
-        height: 100%;
-        opacity: 1;
+        overflow: hidden;
       }
-      
-      .pricing-card::after {
+
+      .pricing-card::before {
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
-        height: 3px;
-        background: #ddd;
+        height: 4px;
+        background: linear-gradient(90deg, #ff4500, #ff6b35);
+        transform: scaleX(0);
+        transition: transform 0.4s;
       }
-      
+
+      .pricing-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(255, 69, 0, 0.2);
+        border-color: #ff4500;
+      }
+
+      .pricing-card:hover::before {
+        transform: scaleX(1);
+      }
+
       .pricing-card.popular-card {
-        border: 2px solid #ff4500;
-        box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15);
+        border-color: #ff4500;
+        transform: scale(1.05);
       }
-      
-      .pricing-card.popular-card::after {
-        background: #ff4500;
+
+      .pricing-card.popular-card::before {
+        transform: scaleX(1);
       }
-      
+
       .popular-badge {
         position: absolute;
-        top: -12px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #ff4500;
+        top: 20px;
+        right: -35px;
+        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%);
         color: white;
-        padding: 0.4rem 1rem;
+        padding: 0.5rem 3rem;
+        font-size: 0.75rem;
         font-weight: 700;
-        font-size: 0.7rem;
-        z-index: 10;
-        letter-spacing: 0.5px;
-        border-radius: 2px;
+        text-transform: uppercase;
+        transform: rotate(45deg);
+        box-shadow: 0 4px 10px rgba(255, 69, 0, 0.3);
       }
-      
+
       .pricing-card-body {
-        padding: 1.5rem 1.25rem;
         position: relative;
         z-index: 1;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
       }
-      
+
       .plan-name {
-        font-size: 1.25rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        color: #1a1a1a;
-        margin-bottom: 0.75rem;
+        color: #1a1a1b;
+        margin-bottom: 1rem;
       }
-      
+
       .plan-price {
-        margin-bottom: 0.75rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid #eee;
+        margin-bottom: 1rem;
       }
-      
+
       .price-amount {
-        font-size: 2.25rem;
-        font-weight: 800;
-        color: #ff4500;
+        font-size: 3.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         line-height: 1;
+        display: inline-block;
       }
-      
+
       .price-period {
-        display: block;
         color: #666;
-        font-size: 0.8rem;
-        margin-top: 0.25rem;
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        display: block;
+        margin-bottom: 1.5rem;
       }
-      
+
+      .plan-description {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        min-height: 60px;
+      }
+
       .plan-features {
         list-style: none;
         padding: 0;
-        margin: 0.75rem 0 1rem 0;
-        flex-grow: 1;
+        margin: 0 0 2rem 0;
       }
-      
+
       .plan-features li {
-        padding: 0.5rem 0;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        color: #444;
-        font-weight: 400;
-        font-size: 0.85rem;
-      }
-      
-      .plan-features i {
-        font-size: 0.9rem;
-        width: 16px;
-        height: 16px;
+        padding: 0.75rem 0;
+        color: #1a1a1b;
         display: flex;
         align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-top: 2px;
+        gap: 0.75rem;
+        border-bottom: 1px solid #f0f0f0;
       }
-      
-      .plan-features .fa-check {
-        color: #28a745;
+
+      .plan-features li:last-child {
+        border-bottom: none;
       }
-      
-      /* Buttons - Solid */
+
+      .plan-features i {
+        color: #ff4500;
+        font-size: 1.1rem;
+      }
+
       .pricing-cta {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border-radius: 3px;
-        font-weight: 700;
-        font-size: 0.9rem;
+        padding: 1rem 2rem;
+        border-radius: 50px;
         border: none;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
+        font-weight: 700;
+        font-size: 1.1rem;
         cursor: pointer;
+        transition: all 0.3s;
+        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 69, 0, 0.2);
       }
-      
+
+      .pricing-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(255, 69, 0, 0.35);
+      }
+
+      .pricing-cta.secondary {
+        background: white;
+        color: #ff4500;
+        border: 2px solid #ff4500;
+      }
+
+      .pricing-cta.secondary:hover {
+        background: #ff4500;
+        color: white;
+      }
+
       .btn-current {
         background: #e9ecef;
         color: #6c757d;
         cursor: not-allowed;
+        box-shadow: none;
       }
-      
-      .btn-primary-plan {
-        background: #ff4500;
-        color: white;
+
+      .btn-current:hover {
+        transform: none;
+        box-shadow: none;
       }
-      
+
       .pricing-footer {
         text-align: center;
         margin-top: 2rem;
         color: #666;
         font-size: 0.85rem;
       }
-      
+
       .pricing-footer i {
         margin-right: 0.5rem;
         color: #28a745;
       }
-      
+
       /* General Card Styles */
       .card {
         border-radius: 4px;
         border: 1px solid #ddd;
         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-      }
-      
-      /* Remove All Hover Effects */
-      .pricing-card:hover {
-        border-color: #ddd;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      }
-      
-      .pricing-card.popular-card:hover {
-        border-color: #ff4500;
-        box-shadow: 0 2px 8px rgba(255, 69, 0, 0.15);
-      }
-      
-      .pricing-cta:hover {
-        opacity: 0.9;
-      }
-      
-      .plan-features li:hover {
-        color: #444;
       }
       
       /* Responsive */
@@ -342,7 +351,7 @@
                 class="fab fa-reddit-alien text-reddit"
                 style="font-size: 3rem"
               ></i>
-              <h3 class="mt-3 fw-bold">Welcome to ReddiGen</h3>
+              <h3 class="mt-3 fw-bold">Welcome to Redrule</h3>
               <p class="text-muted">Sign in to optimize your Reddit posts</p>
             </div>
 
@@ -458,7 +467,7 @@
     <div class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <h4 class="mb-0">
-          <i class="fab fa-reddit-alien text-reddit me-2"></i>ReddiGen
+          <i class="fab fa-reddit-alien text-reddit me-2"></i>Redrule
         </h4>
       </div>
 
@@ -481,7 +490,7 @@
         </a>
         <a href="#" class="sidebar-item" data-page="pricing">
           <i class="fas fa-crown"></i>
-          <span>Pricing Plans</span>
+          <span>Upgrade</span>
         </a>
         <a href="#" class="sidebar-item" onclick="openFeedbackModal()">
           <i class="fas fa-comments"></i>
@@ -492,7 +501,7 @@
       <div class="sidebar-footer">
         <div class="upgrade-section">
           <div class="credits-display">
-            <span id="creditsLeft" class="credits-text">0</span> Posts left
+            <span id="creditsLeft" class="credits-text">5</span> Posts left
           </div>
           <button class="btn-upgrade-plan" onclick="navigateToPage('pricing')">
             Upgrade plan
@@ -545,7 +554,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                   <small class="text-muted">Posts Used</small>
                   <small class="fw-bold text-reddit" id="dropdownCreditsUsed"
-                    >0 / 10</small
+                    >0 / 5</small
                   >
                 </div>
                 <div class="progress mt-2" style="height: 6px">
@@ -1103,7 +1112,7 @@
               <div class="card shadow-sm mb-4">
                 <div class="card-body p-4">
                   <h5 class="fw-bold mb-4">
-                    <i class="fas fa-coins text-warning me-2"></i>Your Posts
+                    <i class="fas fa-file-alt text-warning me-2"></i>Your Posts
                   </h5>
 
                   <div class="p-3 bg-light rounded mb-3">
@@ -1111,7 +1120,7 @@
                       class="fw-bold text-reddit mb-0"
                       id="settingsCreditsDisplay"
                     >
-                      0
+                      5
                     </h3>
                     <small class="text-muted" id="settingsCreditsSubtext"
                       >Posts available</small
@@ -1224,23 +1233,23 @@
 
                   <ul class="plan-features">
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       <span id="starterPosts">150 posts per month</span>
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       AI generation
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Rule optimization
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Post history
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Email support
                     </li>
                   </ul>
@@ -1253,10 +1262,7 @@
             </div>
 
             <div class="col-lg-4 col-md-6">
-              <div class="pricing-card popular-card">
-                <div class="popular-badge">
-                  MOST POPULAR
-                </div>
+              <div class="pricing-card">
                 <div class="pricing-card-body">
                   <h3 class="plan-name">Professional</h3>
                   <div class="plan-price">
@@ -1267,27 +1273,27 @@
 
                   <ul class="plan-features">
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       <span id="professionalPosts">250 posts per month</span>
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Advanced AI models
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Priority generation
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Scheduling features
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Priority support
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Analytics dashboard
                     </li>
                   </ul>
@@ -1300,8 +1306,12 @@
             </div>
 
             <div class="col-lg-4 col-md-6">
-              <div class="pricing-card">
+              <div class="pricing-card popular-card">
+                <div class="popular-badge">
+                  🔥 LIMITED TIME OFFER
+                </div>
                 <div class="pricing-card-body">
+                  <div class="countdown-timer" id="dashboardCountdownTimer" style="font-size: 0.9rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem; text-align: center;"></div>
                   <h3 class="plan-name">Lifetime Access</h3>
                   <div class="plan-price">
                     <div class="price-amount" id="enterprisePrice">$29</div>
@@ -1311,27 +1321,27 @@
 
                   <ul class="plan-features">
                     <li>
-                      <i class="fas fa-check"></i>
-                      <strong>300 posts per month (forever)</strong>
+                      <i class="fas fa-check-circle"></i>
+                      300 posts per month (forever)
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       All Professional features
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Lifetime updates
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       VIP support
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       Early access to new features
                     </li>
                     <li>
-                      <i class="fas fa-check"></i>
+                      <i class="fas fa-check-circle"></i>
                       No recurring charges
                     </li>
                   </ul>
@@ -1362,7 +1372,7 @@
       >
         <div class="toast-header">
           <i class="fas fa-bell me-2 text-reddit"></i>
-          <strong class="me-auto" id="toastTitle">ReddiGen</strong>
+          <strong class="me-auto" id="toastTitle">Redrule</strong>
           <button
             type="button"
             class="btn-close"
@@ -1547,7 +1557,7 @@
           </div>
           <div class="modal-body p-4">
             <p class="text-muted small mb-3">
-              Help us improve ReddiGen! Tell us what you think, report bugs, or
+              Help us improve Redrule! Tell us what you think, report bugs, or
               suggest features.
             </p>
             <div class="mb-3">
@@ -1634,8 +1644,8 @@
                     Starter Plan
                   </h5>
 
-                  <p class="text-muted mb-2">Credits:</p>
-                  <h5 class="fw-bold" id="successCredits">50 posts</h5>
+                  <p class="text-muted mb-2">Posts:</p>
+                  <h5 class="fw-bold" id="successCredits">150 posts</h5>
                 </div>
                 <div class="col-6">
                   <p class="text-muted mb-2">Billing:</p>
@@ -1650,7 +1660,7 @@
             <p class="text-muted mb-4">
               <i class="fas fa-info-circle"></i>
               You can now generate up to
-              <span id="successPostsCount" class="fw-bold">50</span> Reddit
+              <span id="successPostsCount" class="fw-bold">150</span> Reddit
               posts per month!
             </p>
 
@@ -1668,6 +1678,46 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Countdown Timer for Lifetime Deal - FLASH SALE
+      function initDashboardCountdown() {
+        const countdownElement = document.getElementById('dashboardCountdownTimer');
+        if (!countdownElement) return;
+        
+        // Fixed flash sale end date - November 20, 2025 at midnight (3 days from Nov 16)
+        const targetDate = new Date('November 20, 2025 23:59:59').getTime();
+        
+        function updateCountdown() {
+          const now = new Date().getTime();
+          const distance = targetDate - now;
+          
+          if (distance < 0) {
+            countdownElement.innerHTML = '🔥 FLASH SALE ENDED';
+            return;
+          }
+          
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          
+          countdownElement.innerHTML = `🔥 FLASH SALE: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      }
+      
+      // Start countdown when page loads
+      document.addEventListener('DOMContentLoaded', initDashboardCountdown);
+      
+      // Also start when navigating to pricing section
+      document.addEventListener('click', function(e) {
+        if (e.target.closest('[data-page="pricing"]')) {
+          setTimeout(initDashboardCountdown, 100);
+        }
+      });
+    </script>
     <script src="dashboard.js"></script>
   </body>
 </html>

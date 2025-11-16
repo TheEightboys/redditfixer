@@ -164,7 +164,7 @@ app.get("/api/test", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.json({ message: "ReddiGen API", status: "online" });
+  res.json({ message: "Redrule API", status: "online" });
 });
 
 // Get user data
@@ -670,7 +670,7 @@ app.use((req, res, next) => {
 // ==========================================
 app.listen(PORT, () => {
   console.log(`\n${"=".repeat(60)}`);
-  console.log(`✅ ReddiGen RUNNING on port ${PORT}`);
+  console.log(`✅ Redrule RUNNING on port ${PORT}`);
   console.log(`🌐 Origins: ${allowedOrigins.length}`);
   console.log(`${"=".repeat(60)}\n`);
 });

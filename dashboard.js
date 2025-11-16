@@ -75,7 +75,7 @@ const PRICING_DATA = {
       posts: 150,
       productId: "pdt_LBHf0mWr6mV54umDhx9cn",
       checkoutUrl:
-        "https://test.checkout.dodopayments.com/buy/pdt_XocDrGw3HxTb0nD7nyYyl?quantity=1",
+        "https://checkout.dodopayments.com/buy/pdt_LBHf0mWr6mV54umDhx9cn?quantity=1",
     },
     yearly: {
       price: 11.11,
@@ -405,7 +405,7 @@ async function loadUserData() {
     user_id: currentUser?.id || "temp-user-id",
     email: currentUser?.email || "user@example.com",
     display_name: currentUser?.email?.split("@")[0] || "User",
-    bio: "Welcome to ReddiGen!",
+    bio: "Welcome to Redrule!",
     created_at: new Date().toISOString(),
   };
 
@@ -541,20 +541,20 @@ function updateUI() {
   console.log("  - Full userProfile:", userProfile);
   console.log("  - Full userPlan:", userPlan);
   console.log("  - Plan type:", userPlan.plan_type);
-  console.log("  - Credits remaining:", userPlan.credits_remaining);
+  console.log("  - Posts remaining:", userPlan.credits_remaining);
   console.log("  - Posts per month:", userPlan.posts_per_month);
 
-  const credits = userPlan.credits_remaining || 0;
-  const maxCredits = userPlan.posts_per_month || 0;
-  const creditsUsed = maxCredits - credits;
-  const progressPercent = maxCredits > 0 ? (creditsUsed / maxCredits) * 100 : 0;
+  const posts = userPlan.credits_remaining || 0;
+  const maxPosts = userPlan.posts_per_month || 0;
+  const postsUsed = maxPosts - posts;
+  const progressPercent = maxPosts > 0 ? (postsUsed / maxPosts) * 100 : 0;
   const joinDate = new Date(userProfile.created_at).toLocaleDateString(
     "en-US",
     { month: "short", year: "numeric" }
   );
 
-  console.log(`  - Setting creditsLeft to: ${credits}`);
-  setText("creditsLeft", credits);
+  console.log(`  - Setting creditsLeft to: ${posts}`);
+  setText("creditsLeft", posts);
 
   console.log(`  - Setting profile data:`);
   console.log(
@@ -571,22 +571,22 @@ function updateUI() {
   // Update all UI elements
   setText("dropdownUserName", userProfile.display_name || userProfile.email);
   setText("dropdownUserEmail", userProfile.email);
-  setText("dropdownCreditsUsed", `${creditsUsed} / ${maxCredits}`);
+  setText("dropdownCreditsUsed", `${postsUsed} / ${maxPosts}`);
   setStyle("creditsProgress", "width", `${progressPercent}%`);
   setText("dropdownTotalPosts", userHistory.length);
   setText("dropdownJoinDate", joinDate);
   setText("profileName", userProfile.display_name || userProfile.email);
   setText("profileEmail", userProfile.email);
   setText("totalPosts", userHistory.length);
-  setText("creditsUsed", creditsUsed);
+  setText("creditsUsed", postsUsed);
   setText("memberSince", joinDate.split(" ")[1]);
   setValue("settingsEmail", userProfile.email);
   setValue("settingsDisplayName", userProfile.display_name || "");
   setValue("settingsBio", userProfile.bio || "");
-  setText("settingsCreditsDisplay", credits);
+  setText("settingsCreditsDisplay", posts);
   setText(
     "settingsCreditsSubtext",
-    `${credits} / ${maxCredits} posts remaining`
+    `${posts} / ${maxPosts} posts remaining`
   );
   setStyle("settingsProgressDisplay", "width", `${progressPercent}%`);
 
@@ -1005,7 +1005,7 @@ async function handleFetchRules(type) {
 
 async function handleAIGenerate(isRegen = false) {
   if (!userPlan || userPlan.credits_remaining <= 0) {
-    showToast("No credits remaining. Please upgrade.", "error");
+    showToast("No posts remaining. Please upgrade.", "error");
     return navigateToPage("pricing");
   }
 
@@ -1073,7 +1073,7 @@ async function handleAIGenerate(isRegen = false) {
 
 async function handleOptimize(isRegen = false) {
   if (!userPlan || userPlan.credits_remaining <= 0) {
-    showToast("No credits remaining. Please upgrade.", "error");
+    showToast("No posts remaining. Please upgrade.", "error");
     return navigateToPage("pricing");
   }
 
@@ -1796,13 +1796,13 @@ function updatePricingDisplay() {
     setText(`${plan}Price`, `$${data.price}`);
     setText(
       `${plan}Posts`,
-      `${data.posts} Posts Per ${cycle === "yearly" ? "Year" : "Month"}`
+      `${data.posts} posts per ${cycle === "yearly" ? "year" : "month"}`
     );
     
     // Special handling for enterprise/lifetime plan
     if (plan === "enterprise") {
       setText(`${plan}Billing`, "one-time payment");
-      setText(`${plan}Posts`, `${data.posts} Posts Per Month (Forever)`);
+      setText(`${plan}Posts`, `${data.posts} posts per month (forever)`);
     } else {
       setText(`${plan}Billing`, cycle === "yearly" ? "/year" : "/month");
     }

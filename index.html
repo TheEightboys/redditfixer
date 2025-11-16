@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ReddiGen - AI-Powered Reddit Post Generator</title>
+    <title>Redrule - AI-Powered Reddit Post Generator</title>
+    <link rel="icon" type="image/png" href="redruleslogo.png">
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
@@ -61,16 +62,17 @@
       }
 
       .logo-icon {
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(135deg, #ff4500 0%, #ff6b35 100%);
-        border-radius: 12px;
+        width: 50px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
-        font-weight: 900;
-        box-shadow: 0 4px 15px rgba(255, 69, 0, 0.3);
+      }
+
+      .logo-icon img {
+        width: 250%;
+        height: 250%;
+        object-fit: contain;
       }
 
       .nav-links {
@@ -1053,8 +1055,10 @@
     <!-- Navbar -->
     <nav class="navbar">
       <a href="/" class="logo">
-        <div class="logo-icon">R</div>
-        <span>ReddiGen</span>
+        <div class="logo-icon">
+          <img src="redruleslogo.png" alt="Redrule Logo">
+        </div>
+        <span></span>
       </a>
       <ul class="nav-links">
         <li><a href="#home">Home</a></li>
@@ -1085,7 +1089,7 @@
         </h1>
 
         <p>
-          ReddiGen automatically fetches subreddit rules and creates perfectly
+          Redrule automatically fetches subreddit rules and creates perfectly
           compliant, engaging posts. Stop worrying about post removals and focus on growing your Reddit
           presence.
         </p>
@@ -1152,7 +1156,7 @@
     <!-- How It Works -->
     <section id="how-it-works" class="how-it-works">
       <div class="section-content">
-        <h2 class="section-title">How ReddiGen Works</h2>
+        <h2 class="section-title">How Redrule Works</h2>
         <p class="section-subtitle">
           Three simple steps to create rule-compliant, engaging Reddit posts
         </p>
@@ -1300,7 +1304,7 @@
             <p class="pricing-description">Perfect for individual creators getting started</p>
             
             <ul class="pricing-features">
-              <li><i class="fas fa-check-circle"></i> <span data-monthly="150" data-yearly="1800">150</span> posts per month</li>
+              <li><i class="fas fa-check-circle"></i> <span data-monthly="150" data-yearly="1800">150</span> posts <span class="period-text">per month</span></li>
               <li><i class="fas fa-check-circle"></i> AI generation</li>
               <li><i class="fas fa-check-circle"></i> Rule optimization</li>
               <li><i class="fas fa-check-circle"></i> Post history</li>
@@ -1310,16 +1314,15 @@
             <button class="pricing-cta" data-plan="starter">Get Started</button>
           </div>
 
-          <!-- Professional Plan - Popular -->
-          <div class="pricing-card popular">
-            <div class="popular-badge">Most Popular</div>
+          <!-- Professional Plan -->
+          <div class="pricing-card">
             <div class="pricing-plan-name">Professional</div>
             <div class="pricing-price" data-monthly="2.29" data-yearly="19.22">$2.29</div>
             <span class="pricing-period">/month</span>
             <p class="pricing-description">For serious creators and marketers</p>
             
             <ul class="pricing-features">
-              <li><i class="fas fa-check-circle"></i> <span data-monthly="250" data-yearly="3000">250</span> posts per month</li>
+              <li><i class="fas fa-check-circle"></i> <span data-monthly="250" data-yearly="3000">250</span> posts <span class="period-text">per month</span></li>
               <li><i class="fas fa-check-circle"></i> Advanced AI models</li>
               <li><i class="fas fa-check-circle"></i> Priority generation</li>
               <li><i class="fas fa-check-circle"></i> Scheduling features</li>
@@ -1330,8 +1333,10 @@
             <button class="pricing-cta" data-plan="professional">Get Started</button>
           </div>
 
-          <!-- Lifetime Plan -->
-          <div class="pricing-card">
+          <!-- Lifetime Plan - MOST POPULAR -->
+          <div class="pricing-card popular">
+            <div class="popular-badge">🔥 LIMITED TIME OFFER</div>
+            <div class="countdown-timer" id="countdownTimer" style="font-size: 0.9rem; font-weight: 700; color: #dc2626; margin-bottom: 0.5rem; text-align: center;"></div>
             <div class="pricing-plan-name">Lifetime Access</div>
             <div class="pricing-price">$29.00</div>
             <span class="pricing-period">one-time payment</span>
@@ -1370,7 +1375,7 @@
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-section">
-          <h4><i class="fas fa-robot"></i> ReddiGen</h4>
+          <h4><i class="fas fa-robot"></i> Redrule</h4>
           <p>
             AI-powered Reddit post generator that ensures 100% rule compliance.
           </p>
@@ -1409,7 +1414,7 @@
 
       <div class="footer-bottom">
         <p>
-          &copy; 2025 ReddiGen. All rights reserved. Made with
+          &copy; 2025 Redrule. All rights reserved. Made with
           <i class="fas fa-heart" style="color: #ff4500"></i> for Reddit
           creators.
         </p>
@@ -1625,7 +1630,7 @@
           const yearly = el.getAttribute('data-yearly');
           
           if (monthly && yearly) {
-            el.textContent = isYearly ? `${yearly}` : `${monthly}`;
+            el.textContent = isYearly ? `$${yearly}` : `$${monthly}`;
           }
         });
         
@@ -1644,6 +1649,11 @@
           if (monthly && yearly) {
             el.textContent = isYearly ? yearly : monthly;
           }
+        });
+        
+        // Update period text in features (per month / per year)
+        document.querySelectorAll('.period-text').forEach(el => {
+          el.textContent = isYearly ? 'per year' : 'per month';
         });
       }
 
@@ -1840,9 +1850,45 @@
       }
 
       // ============================================
+      // COUNTDOWN TIMER - FLASH SALE
+      // ============================================
+      function initCountdown() {
+        const countdownElement = document.getElementById('countdownTimer');
+        if (!countdownElement) return;
+        
+        // Fixed flash sale end date - November 20, 2025 at midnight (3 days from Nov 16)
+        const targetDate = new Date('November 20, 2025 23:59:59').getTime();
+        
+        function updateCountdown() {
+          const now = new Date().getTime();
+          const distance = targetDate - now;
+          
+          if (distance < 0) {
+            countdownElement.innerHTML = '🔥 FLASH SALE ENDED';
+            return;
+          }
+          
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+          
+          countdownElement.innerHTML = `🔥 FLASH SALE: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+      }
+
+      // ============================================
       // UTILITY FUNCTIONS
       // ============================================
-      console.log('🚀 ReddiGen Landing Page Loaded');
+      console.log('🚀 Redrule Landing Page Loaded');
+      
+      // Initialize countdown on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        initCountdown();
+      });
     </script>
   </body>
 </html>

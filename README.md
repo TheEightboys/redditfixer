@@ -1,4 +1,4 @@
-# ReddiGen - AI-Powered Reddit Post Generator
+# Redrule - AI-Powered Reddit Post Generator
 
 A full-stack application that uses AI (Google Gemini) to generate and optimize Reddit posts that follow subreddit rules. Users can create accounts, manage credit-based plans, and purchase upgrades via Dodo Payments.
 

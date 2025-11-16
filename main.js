@@ -245,7 +245,7 @@ function initializeRippleEffect() {
 }
 
 console.log(
-  "%c🚀 ReddiGen Loaded!",
+  "%c🚀 Redrule Loaded!",
   "color: #ff4500; font-size: 20px; font-weight: bold;"
 );
 
@@ -318,11 +318,12 @@ async function handleSignup(e) {
 
     if (error) throw error;
 
-    showToast("Account created! Please check your email to verify.", "success");
+    showToast("Account created successfully! Redirecting to dashboard...", "success");
 
-    // Switch back to login
-    document.getElementById("signupSection").style.display = "none";
-    document.getElementById("emailAuthSection").style.display = "block";
+    // Redirect to dashboard after signup
+    setTimeout(() => {
+      window.location.href = "/dashboard.html";
+    }, 1500);
   } catch (error) {
     showToast(error.message, "error");
   } finally {
@@ -737,13 +738,13 @@ function updateCreditsDisplay() {
    LOCAL STORAGE
    ============================================ */
 function saveToLocalStorage() {
-  localStorage.setItem("reddiGenCredits", userCredits);
-  localStorage.setItem("reddiGenHistory", JSON.stringify(postHistory));
+  localStorage.setItem("redruleCredits", userCredits);
+  localStorage.setItem("redruleHistory", JSON.stringify(postHistory));
 }
 
 async function loadUserData() {
-  const savedCredits = localStorage.getItem("reddiGenCredits");
-  const savedHistory = localStorage.getItem("reddiGenHistory");
+  const savedCredits = localStorage.getItem("redruleCredits");
+  const savedHistory = localStorage.getItem("redruleHistory");
 
   if (savedCredits) {
     userCredits = parseInt(savedCredits);
@@ -952,7 +953,7 @@ function createConfetti() {
    CONSOLE LOG
    ============================================ */
 console.log(
-  "%c🚀 ReddiGen Dashboard Loaded!",
+  "%c🚀 Redrule Dashboard Loaded!",
   "color: #ff4500; font-size: 20px; font-weight: bold;"
 );
 console.log(
